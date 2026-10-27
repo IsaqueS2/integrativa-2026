@@ -1,0 +1,19 @@
+@page
+@{ ViewData["Title"] = "Configurações"; }
+<h1>Configurações</h1>
+<p>Cadastre as informações do negócio e os parâmetros usados nos novos lançamentos.</p>
+<section>
+    <h2>Negócio e saldo inicial</h2>
+    <form id="settings-form"><div class="grid">
+        <label>Nome do negócio<input name="name" maxlength="120" required /></label>
+        <label>Saldo inicial em R$<input type="number" step="0.01" name="openingBalance" required /></label>
+        <label>Data de referência<input type="date" name="openingDate" required /></label>
+        <label>Reserva mínima em R$<input type="number" min="0" step="0.01" name="reserve" required /></label>
+    </div><p class="hint">O saldo inicial é a posição no início da data de referência. A reserva é um parâmetro de consulta e não uma recomendação de retirada.</p><div class="actions"><button type="submit">Salvar configurações</button></div></form>
+</section>
+<div class="split">
+<section><h2>Categorias de despesas</h2><form id="category-form"><div class="grid"><label>Nome<input name="name" maxlength="80" required /></label><label>Tipo<select name="kind"><option value="Operating">Despesa operacional</option><option value="Supplies">Compra de insumos</option><option value="AllocatedCost">Custo já alocado nas receitas</option></select></label></div><div class="actions"><button type="submit">Adicionar categoria</button></div></form><div class="table-wrap spaced"><table><thead><tr><th>Categoria</th><th>Tipo</th><th>Ações</th></tr></thead><tbody id="category-rows"></tbody></table></div></section>
+<section><h2>Canais de venda</h2><form id="channel-form"><div class="grid"><label>Nome<input name="name" maxlength="80" required /></label><label>Taxa percentual %<input name="rate" type="number" min="0" max="100" step="0.01" value="0" required /></label><label>Taxa fixa em R$<input name="fixedFee" type="number" min="0" step="0.01" value="0" required /></label></div><div class="actions"><button type="submit">Adicionar canal</button></div></form><div class="table-wrap spaced"><table><thead><tr><th>Canal</th><th>Taxa %</th><th class="money">Taxa fixa</th><th>Ações</th></tr></thead><tbody id="channel-rows"></tbody></table></div></section>
+</div>
+<section><h2>Meios de pagamento</h2><form id="payment-form"><div class="grid"><label>Nome<input name="name" maxlength="80" required /></label><label>Taxa percentual %<input name="rate" type="number" min="0" max="100" step="0.01" value="0" required /></label><label>Taxa fixa em R$<input name="fixedFee" type="number" min="0" step="0.01" value="0" required /></label></div><div class="actions"><button type="submit">Adicionar meio de pagamento</button></div></form><div class="table-wrap spaced"><table><thead><tr><th>Meio</th><th>Taxa %</th><th class="money">Taxa fixa</th><th>Ações</th></tr></thead><tbody id="payment-rows"></tbody></table></div><p class="hint">As taxas percentuais de canal e pagamento incidem sobre o bruto após o desconto; as taxas fixas são somadas. Configurações alteradas só afetam novas vendas.</p></section>
+@section Scripts { <script src="~/js/settings.js" asp-append-version="true"></script> }

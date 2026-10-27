@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+.vs/
+*.user
+*.db
+*.db-shm
+*.db-wal
+*.sqlite*
+.packages/
+.dotnet-home/
+TestResults/
+work/
+artifacts/

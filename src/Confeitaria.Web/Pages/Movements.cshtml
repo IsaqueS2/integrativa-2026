@@ -1,0 +1,69 @@
+@page
+@{ ViewData["Title"] = "Lançamentos"; }
+<h1>Lançamentos</h1>
+<p>Registre uma venda por valor total, uma despesa ou uma movimentação da proprietária.</p>
+<section>
+    <h2>Venda rápida</h2>
+    <form id="sale-form">
+        <div class="grid">
+            <label>Data da venda<input type="date" name="date" data-today required /></label>
+            <label>Valor bruto em R$<input type="number" step="0.01" min="0.01" name="gross" required /></label>
+            <label>Desconto em R$<input type="number" step="0.01" min="0" name="discount" value="0" required /></label>
+            <label>Canal<select name="channelId" data-catalog="channels" required></select></label>
+            <label>Meio de pagamento<select name="paymentMethodId" data-catalog="paymentMethods" required></select></label>
+            <label>Previsão de recebimento<input type="date" name="expectedDate" data-today required /></label>
+            <label>Tipo de registro<select name="recordType"><option value="Individual">Individual</option><option value="Consolidated">Consolidado do dia</option></select></label>
+            <label>Custo informado em R$<input type="number" step="0.01" min="0" name="cost" /><span class="hint">Em branco significa custo desconhecido.</span></label>
+            <label>Receita de referência<select name="recipeId" id="sale-recipe"><option value="">Sem receita</option></select></label>
+            <label>Unidades da receita<input type="number" step="0.001" min="0.001" value="1" name="recipeQuantity" /></label>
+            <label>Taxa efetiva total em R$<input type="number" step="0.01" min="0" name="fee" /><span class="hint">Em branco usa as taxas configuradas.</span></label>
+            <label class="wide">Descrição<input name="description" maxlength="300" /></label>
+        </div>
+        <p class="hint">Se usar uma receita, deixe o custo manual vazio. Em um registro consolidado, não inclua vendas já lançadas individualmente.</p>
+        <div class="actions"><button type="submit">Registrar venda pendente</button></div>
+    </form>
+</section>
+<div class="split">
+<section>
+    <h2>Despesa</h2>
+    <form id="expense-form">
+        <div class="grid">
+            <label>Data de competência<input type="date" name="date" data-today required /></label>
+            <label>Vencimento<input type="date" name="dueDate" data-today required /></label>
+            <label>Valor em R$<input type="number" step="0.01" min="0.01" name="amount" required /></label>
+            <label>Categoria<select name="categoryId" data-catalog="categories" required></select></label>
+            <label class="wide">Descrição<input name="description" maxlength="300" required /></label>
+        </div>
+        <p class="hint">Use uma categoria de compra de insumos ou custo já alocado quando o gasto estiver incluído no custo das vendas. Esses gastos não são descontados novamente no resultado.</p>
+        <div class="actions"><button type="submit">Registrar despesa pendente</button></div>
+    </form>
+</section>
+<section>
+    <h2>Aporte ou retirada pessoal</h2>
+    <form id="owner-form">
+        <div class="grid">
+            <label>Data<input type="date" name="date" data-today required /></label>
+            <label>Tipo<select name="kind"><option value="Contribution">Aporte</option><option value="Withdrawal">Retirada pessoal</option></select></label>
+            <label>Valor em R$<input type="number" step="0.01" min="0.01" name="amount" required /></label>
+            <label>Descrição<input name="description" maxlength="300" required /></label>
+        </div>
+        <p class="hint">Aporte não é faturamento. Retirada pessoal reduz o caixa sem ser custo do produto.</p>
+        <div class="actions"><button type="submit">Registrar movimentação</button></div>
+    </form>
+</section>
+</div>
+<section>
+    <h2>Consultar lançamentos</h2>
+    <form id="movement-filter"><div class="grid filters">
+        <label>De<input type="date" name="from" /></label><label>Até<input type="date" name="to" /></label>
+        <label>Canal<select name="channelId" data-catalog="channels"><option value="">Todos</option></select></label>
+        <label>Meio de pagamento<select name="paymentMethodId" data-catalog="paymentMethods"><option value="">Todos</option></select></label>
+        <label>Categoria<select name="categoryId" data-catalog="categories"><option value="">Todas</option></select></label>
+        <label>Situação<select name="status"><option value="">Todas</option><option value="Pending">Pendente</option><option value="Received">Venda recebida</option><option value="Paid">Despesa paga</option><option value="Cancelled">Cancelado</option></select></label>
+    </div><div class="actions"><button type="submit" class="secondary">Consultar</button></div></form>
+    <h3>Vendas</h3><div class="table-wrap"><table><thead><tr><th>Data</th><th>Descrição e canal</th><th class="money">Bruto</th><th class="money">Taxas</th><th class="money">Líquido</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="sale-rows"></tbody></table></div>
+    <h3>Despesas</h3><div class="table-wrap"><table><thead><tr><th>Competência</th><th>Descrição</th><th>Vencimento</th><th class="money">Valor</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="expense-rows"></tbody></table></div>
+    <h3>Aportes e retiradas</h3><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="money">Valor</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="owner-rows"></tbody></table></div>
+    <div class="actions"><button type="button" id="previous-page" class="secondary">Página anterior</button><span id="page-info"></span><button type="button" id="next-page" class="secondary">Próxima página</button></div>
+</section>
+@section Scripts { <script src="~/js/movements.js" asp-append-version="true"></script> }

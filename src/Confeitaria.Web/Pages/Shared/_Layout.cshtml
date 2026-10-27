@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · Confeitaria</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+<header>
+    <div class="brand"><strong>Confeitaria</strong><span>Gestão simples do negócio</span></div>
+    <nav aria-label="Navegação principal">
+        <a href="/">Painel</a>
+        <a href="/Movements">Lançamentos</a>
+        <a href="/Settings">Configurações</a>
+        <a href="/Recipes">Receitas e preços</a>
+        <a href="/docs" target="_blank" rel="noopener">API</a>
+    </nav>
+</header>
+<main id="conteudo">
+    <div id="message" role="status" aria-live="polite" hidden></div>
+    @RenderBody()
+</main>
+<footer>Protótipo local · Avaliação Integrativa UNIPLAC · Use dados fictícios.</footer>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
