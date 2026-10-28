@@ -24,8 +24,8 @@
         const recipeInfo = document.getElementById("recipe-list-info");
         if (ingredientInfo) ingredientInfo.textContent = `${ingredients.length} de ${ingredientResult.total ?? ingredients.length} ingredientes. A tela provisória exibe até 100 registros; a API permite consultar as demais páginas.`;
         if (recipeInfo) recipeInfo.textContent = `${recipes.length} de ${recipeResult.total ?? recipes.length} receitas. A tela provisória exibe até 100 registros; a API permite consultar as demais páginas.`;
-        rows("ingredient-rows", ingredients.map(item => `<tr><td>${escape(item.name)}</td><td>${quantity(item.packageQuantity)} ${escape(item.unit)}</td><td class="money">${money(item.packagePriceCents)}</td><td><button type="button" class="secondary" data-action="edit" data-id="${item.id}">Editar</button></td></tr>`).join(""));
-        rows("recipe-rows", recipes.map(recipe => `<tr><td>${escape(recipe.name)}</td><td>${quantity(recipe.yieldQuantity)} ${escape(recipe.yieldUnit)}</td><td><div class="inline-actions"><button type="button" data-action="cost" data-id="${recipe.id}">Ver custo</button><button class="secondary" type="button" data-action="edit" data-id="${recipe.id}">Editar</button></div></td></tr>`).join(""), 3);
+        rows("ingredient-rows", ingredients.map(item => `<tr><td>${escape(item.name)}</td><td>${quantity(item.packageQuantity)} ${escape(item.unit)}</td><td class="money">${money(item.packagePriceCents)}</td><td><button type="button" class="secondary" data-action="edit" data-id="${item.id}">Editar</button></td></tr>`).join(""), 4, "Cadastre o primeiro ingrediente para começar sua ficha técnica.");
+        rows("recipe-rows", recipes.map(recipe => `<tr><td>${escape(recipe.name)}</td><td>${quantity(recipe.yieldQuantity)} ${escape(recipe.yieldUnit)}</td><td><div class="inline-actions"><button type="button" data-action="cost" data-id="${recipe.id}">Ver custo</button><button class="secondary" type="button" data-action="edit" data-id="${recipe.id}">Editar</button></div></td></tr>`).join(""), 3, "Depois de cadastrar ingredientes, monte sua primeira ficha técnica.");
         document.querySelectorAll('#recipe-items select[name="ingredientId"]').forEach(select => {
             const value = select.value; select.replaceChildren(); ingredients.forEach(item => select.add(new Option(item.name, item.id)));
             if ([...select.options].some(option => option.value === value)) select.value = value;
@@ -37,8 +37,8 @@
         const recipe = recipes.find(recipe => recipe.id === id);
         document.getElementById("cost-title").textContent = `Custo de ${recipe?.name || "receita"}`;
         const cards = [["Ingredientes do lote", result.ingredientCostCents], ["Embalagens", result.packagingCents], ["Perda estimada", result.lossCents], ["Mão de obra", result.laborCents], ["Outros rateios", result.allocatedCents], ["Custo total do lote", result.totalCostCents], ["Custo por unidade", result.unitCostCents]];
-        document.getElementById("cost-cards").innerHTML = cards.map(([label, value]) => `<dl class="card"><dt>${escape(label)}</dt><dd>${money(value)}</dd></dl>`).join("");
-        rows("cost-lines", (result.lines || []).map(line => `<tr><td>${escape(line.name)}</td><td>${quantity(line.quantity)} ${escape(line.unit)}</td><td>${quantity(line.packageQuantity)} ${escape(line.unit)}</td><td class="money">${money(line.packagePriceCents)}</td><td class="money">${money(line.costCents)}</td></tr>`).join(""), 5);
+        document.getElementById("cost-cards").innerHTML = cards.map(([label, value], index) => `<dl class="card ${index === 5 ? "card-result" : index === 6 ? "card-featured" : ""}"><dt>${escape(label)}</dt><dd>${money(value)}</dd></dl>`).join("");
+        rows("cost-lines", (result.lines || []).map(line => `<tr><td>${escape(line.name)}</td><td>${quantity(line.quantity)} ${escape(line.unit)}</td><td>${quantity(line.packageQuantity)} ${escape(line.unit)}</td><td class="money">${money(line.packagePriceCents)}</td><td class="money">${money(line.costCents)}</td></tr>`).join(""), 5, "Adicione ingredientes à receita para ver a memória de cálculo.");
         document.getElementById("price-form").elements.recipeId.value = id;
         document.getElementById("price-output").textContent = "";
         document.getElementById("cost-section").hidden = false;
@@ -62,16 +62,16 @@
         const ingredient = ingredients.find(item => item.id === id);
         ingredientForm.elements.id.value = ingredient.id; ingredientForm.elements.name.value = ingredient.name;
         ingredientForm.elements.packageQuantity.value = ingredient.packageQuantity; ingredientForm.elements.unit.value = ingredient.unit;
-        ingredientForm.elements.packagePrice.value = (ingredient.packagePriceCents / 100).toFixed(2); ingredientForm.scrollIntoView({ behavior: "smooth" });
+        ingredientForm.elements.packagePrice.value = ui.decimalInput(ingredient.packagePriceCents / 100); ingredientForm.scrollIntoView({ behavior: "smooth" });
     });
     ui.bindAction("recipe-rows", async (action, id) => {
         if (action === "cost") return showCost(id, true);
         const recipe = recipes.find(recipe => recipe.id === id);
         recipeForm.elements.id.value = recipe.id; recipeForm.elements.name.value = recipe.name;
         recipeForm.elements.yieldQuantity.value = recipe.yieldQuantity; recipeForm.elements.yieldUnit.value = recipe.yieldUnit;
-        recipeForm.elements.packaging.value = (recipe.packagingCents / 100).toFixed(2); recipeForm.elements.laborMinutes.value = recipe.laborMinutes;
-        recipeForm.elements.hourlyRate.value = (recipe.hourlyRateCents / 100).toFixed(2); recipeForm.elements.loss.value = (recipe.lossBasisPoints / 100).toFixed(2);
-        recipeForm.elements.allocated.value = (recipe.allocatedCents / 100).toFixed(2);
+        recipeForm.elements.packaging.value = ui.decimalInput(recipe.packagingCents / 100); recipeForm.elements.laborMinutes.value = recipe.laborMinutes;
+        recipeForm.elements.hourlyRate.value = ui.decimalInput(recipe.hourlyRateCents / 100); recipeForm.elements.loss.value = ui.decimalInput(recipe.lossBasisPoints / 100);
+        recipeForm.elements.allocated.value = ui.decimalInput(recipe.allocatedCents / 100);
         document.getElementById("recipe-items").replaceChildren(); recipe.items.forEach(addItem); recipeForm.scrollIntoView({ behavior: "smooth" });
     });
     document.getElementById("add-recipe-item").addEventListener("click", () => addItem());

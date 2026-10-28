@@ -1,22 +1,39 @@
 @page "/"
 @{ ViewData["Title"] = "Painel"; }
-<h1>Painel financeiro</h1>
-<p>Consulte vendas, pagamentos e caixa. O resultado é uma estimativa baseada nos custos informados.</p>
+<div class="page-heading">
+    <div class="page-heading-copy">
+        <p class="eyebrow">Visão do negócio</p>
+        <h1>Visão geral da sua confeitaria</h1>
+        <p>Acompanhe vendas, caixa e resultado para cuidar do negócio com mais clareza.</p>
+    </div>
+    <a class="button" href="/Movements#sale-form">+ Registrar venda</a>
+</div>
 <section aria-labelledby="filter-title">
-    <h2 id="filter-title">Período da consulta</h2>
+    <h2 id="filter-title">Resumo do período</h2>
     <form id="dashboard-filter">
-        <div class="grid filters">
-            <label>De<input type="date" name="from" required /></label>
-            <label>Até<input type="date" name="to" required /></label>
+        <div class="grid filters dashboard-basic-filters">
+            <label>De<input type="text" name="from" data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" required /></label>
+            <label>Até<input type="text" name="to" data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" required /></label>
             <label>Canal<select name="channelId" data-catalog="channels"><option value="">Todos</option></select></label>
-            <label>Meio de pagamento<select name="paymentMethodId" data-catalog="paymentMethods"><option value="">Todos</option></select></label>
-            <label>Categoria<select name="categoryId" data-catalog="categories"><option value="">Todas</option></select></label>
         </div>
-        <div class="actions"><button type="submit">Consultar</button><button type="button" class="secondary" id="today-summary">Resumo do dia</button><a class="button secondary" id="export-csv" href="#">Exportar movimentações CSV</a><a class="button secondary" id="export-summary" href="#">Exportar resumo CSV</a></div>
+        <div class="actions"><button type="submit">Atualizar resumo</button><button type="button" class="secondary" id="today-summary">Ver hoje</button></div>
+        <details class="advanced-filters">
+            <summary>Mais filtros e exportações</summary>
+            <div class="grid filters advanced-filter-fields">
+                <label>Meio de pagamento<select name="paymentMethodId" data-catalog="paymentMethods"><option value="">Todos</option></select></label>
+                <label>Categoria<select name="categoryId" data-catalog="categories"><option value="">Todas</option></select></label>
+            </div>
+            <div class="actions"><a class="button secondary" id="export-csv" href="#">Exportar movimentações CSV</a><a class="button secondary" id="export-summary" href="#">Exportar resumo CSV</a></div>
+        </details>
     </form>
 </section>
-<div id="dashboard-cards" class="cards" aria-live="polite"><p class="loading">Carregando resumo…</p></div>
-<section><h2>Avisos</h2><ul class="notices" id="dashboard-notices"><li>Carregando…</li></ul></section>
-<section><h2>Vendas por canal</h2><p class="hint">A margem por canal considera os custos das vendas, antes das despesas operacionais gerais.</p><div class="table-wrap"><table><thead><tr><th>Canal</th><th class="money">Vendas líquidas</th><th class="money">Margem antes de despesas</th><th>Custos informados</th></tr></thead><tbody id="channel-totals"></tbody></table></div></section>
+<div class="dashboard-section-title"><h2>Indicadores principais</h2><span class="hint">Valores atualizados para o período selecionado</span></div>
+<div id="dashboard-primary-cards" class="cards" aria-live="polite"><p class="loading">Carregando resumo…</p></div>
+<details class="secondary-metrics">
+    <summary>Ver todos os indicadores financeiros</summary>
+    <div id="dashboard-cards" class="cards" aria-live="polite"></div>
+</details>
+<section><h2>Avisos e atenção</h2><ul class="notices" id="dashboard-notices"><li>Carregando…</li></ul></section>
+<section><h2>Vendas por canal</h2><p class="hint">Compare as vendas líquidas. A margem considera os custos informados, antes das despesas operacionais gerais.</p><div id="channel-chart" class="channel-chart" role="list" aria-label="Comparação de vendas líquidas por canal"></div><div class="table-wrap"><table><thead><tr><th>Canal</th><th class="money">Vendas líquidas</th><th class="money">Margem antes de despesas</th><th>Custos informados</th></tr></thead><tbody id="channel-totals"></tbody></table></div></section>
 <section><h2>Movimentações de caixa</h2><p class="hint">A data de recebimento ou pagamento é usada nesta consulta. O resumo não cria novos lançamentos.</p><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="money">Valor</th></tr></thead><tbody id="ledger-rows"></tbody></table></div><p id="ledger-count" class="hint"></p></section>
 @section Scripts { <script src="~/js/dashboard.js" asp-append-version="true"></script> }

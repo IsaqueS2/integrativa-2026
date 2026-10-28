@@ -1,50 +1,61 @@
 @page
 @{ ViewData["Title"] = "Lançamentos"; }
-<h1>Lançamentos</h1>
-<p>Registre uma venda por valor total, uma despesa ou uma movimentação da proprietária.</p>
+<div class="page-heading">
+    <div class="page-heading-copy">
+        <p class="eyebrow">Rotina financeira</p>
+        <h1>Lançamentos</h1>
+        <p>Registre as vendas do dia e acompanhe o que entra e sai do caixa.</p>
+    </div>
+</div>
 <section>
-    <h2>Venda rápida</h2>
+    <h2>Registrar uma venda</h2>
+    <p class="hint">Comece com data, valor, canal e forma de pagamento. Os detalhes de custo são opcionais.</p>
     <form id="sale-form">
-        <div class="grid">
-            <label>Data da venda<input type="date" name="date" data-today required /></label>
-            <label>Valor bruto em R$<input type="number" step="0.01" min="0.01" name="gross" required /></label>
-            <label>Desconto em R$<input type="number" step="0.01" min="0" name="discount" value="0" required /></label>
+        <div class="grid sale-core-fields">
+            <label>Data da venda<input type="text" name="date" data-today data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" required /></label>
+            <label>Valor bruto<input type="text" inputmode="decimal" class="decimal-input" name="gross" placeholder="Ex.: 75,00" required /></label>
+            <label>Desconto<input type="text" inputmode="decimal" class="decimal-input" name="discount" value="0,00" required /></label>
             <label>Canal<select name="channelId" data-catalog="channels" required></select></label>
             <label>Meio de pagamento<select name="paymentMethodId" data-catalog="paymentMethods" required></select></label>
-            <label>Previsão de recebimento<input type="date" name="expectedDate" data-today required /></label>
+            <label>Previsão de recebimento<input type="text" name="expectedDate" data-today data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" required /></label>
             <label>Tipo de registro<select name="recordType"><option value="Individual">Individual</option><option value="Consolidated">Consolidado do dia</option></select></label>
-            <label>Custo informado em R$<input type="number" step="0.01" min="0" name="cost" /><span class="hint">Em branco significa custo desconhecido.</span></label>
-            <label>Receita de referência<select name="recipeId" id="sale-recipe"><option value="">Sem receita</option></select></label>
-            <label>Unidades da receita<input type="number" step="0.001" min="0.001" value="1" name="recipeQuantity" /></label>
-            <label>Taxa efetiva total em R$<input type="number" step="0.01" min="0" name="fee" /><span class="hint">Em branco usa as taxas configuradas.</span></label>
-            <label class="wide">Descrição<input name="description" maxlength="300" /></label>
         </div>
-        <p class="hint">Se usar uma receita, deixe o custo manual vazio. Em um registro consolidado, não inclua vendas já lançadas individualmente.</p>
+        <details class="advanced-fields">
+            <summary>Adicionar custo, receita ou taxa efetiva</summary>
+            <div class="grid">
+                <label>Custo direto da venda<input type="text" inputmode="decimal" class="decimal-input" name="cost" placeholder="Ex.: 12,50" /><span class="hint">Em branco significa custo desconhecido.</span></label>
+                <label>Receita de referência<select name="recipeId" id="sale-recipe"><option value="">Sem receita</option></select></label>
+                <label>Unidades da receita<input type="number" step="0.001" min="0.001" value="1" name="recipeQuantity" /></label>
+                <label>Taxas efetivas da venda<input type="text" inputmode="decimal" class="decimal-input" name="fee" placeholder="Ex.: 2,50" /><span class="hint">Em branco usa as taxas configuradas.</span></label>
+                <label class="wide">Descrição<input name="description" maxlength="300" /></label>
+            </div>
+            <p class="hint">Ao informar uma receita, deixe o custo direto vazio. No consolidado do dia, não inclua vendas já registradas individualmente.</p>
+        </details>
         <div class="actions"><button type="submit">Registrar venda pendente</button></div>
     </form>
 </section>
 <div class="split">
 <section>
-    <h2>Despesa</h2>
+    <h2>Registrar uma despesa</h2>
     <form id="expense-form">
         <div class="grid">
-            <label>Data de competência<input type="date" name="date" data-today required /></label>
-            <label>Vencimento<input type="date" name="dueDate" data-today required /></label>
-            <label>Valor em R$<input type="number" step="0.01" min="0.01" name="amount" required /></label>
+            <label>Data da despesa<input type="text" name="date" data-today data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" required /></label>
+            <label>Vencimento<input type="text" name="dueDate" data-today data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" required /></label>
+            <label>Valor da despesa<input type="text" inputmode="decimal" class="decimal-input" name="amount" placeholder="Ex.: 45,90" required /></label>
             <label>Categoria<select name="categoryId" data-catalog="categories" required></select></label>
             <label class="wide">Descrição<input name="description" maxlength="300" required /></label>
         </div>
-        <p class="hint">Use uma categoria de compra de insumos ou custo já alocado quando o gasto estiver incluído no custo das vendas. Esses gastos não são descontados novamente no resultado.</p>
+        <p class="hint">Use “Compra de insumos” para ingredientes e embalagens. Gastos já incluídos no custo das receitas não são descontados novamente do resultado.</p>
         <div class="actions"><button type="submit">Registrar despesa pendente</button></div>
     </form>
 </section>
 <section>
-    <h2>Aporte ou retirada pessoal</h2>
+    <h2>Aporte ou retirada</h2>
     <form id="owner-form">
         <div class="grid">
-            <label>Data<input type="date" name="date" data-today required /></label>
+            <label>Data da movimentação<input type="text" name="date" data-today data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" required /></label>
             <label>Tipo<select name="kind"><option value="Contribution">Aporte</option><option value="Withdrawal">Retirada pessoal</option></select></label>
-            <label>Valor em R$<input type="number" step="0.01" min="0.01" name="amount" required /></label>
+            <label>Valor da movimentação<input type="text" inputmode="decimal" class="decimal-input" name="amount" placeholder="Ex.: 100,00" required /></label>
             <label>Descrição<input name="description" maxlength="300" required /></label>
         </div>
         <p class="hint">Aporte não é faturamento. Retirada pessoal reduz o caixa sem ser custo do produto.</p>
@@ -53,9 +64,9 @@
 </section>
 </div>
 <section>
-    <h2>Consultar lançamentos</h2>
+    <h2>Histórico de lançamentos</h2>
     <form id="movement-filter"><div class="grid filters">
-        <label>De<input type="date" name="from" /></label><label>Até<input type="date" name="to" /></label>
+        <label>De<input type="text" name="from" data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" /></label><label>Até<input type="text" name="to" data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" /></label>
         <label>Canal<select name="channelId" data-catalog="channels"><option value="">Todos</option></select></label>
         <label>Meio de pagamento<select name="paymentMethodId" data-catalog="paymentMethods"><option value="">Todos</option></select></label>
         <label>Categoria<select name="categoryId" data-catalog="categories"><option value="">Todas</option></select></label>

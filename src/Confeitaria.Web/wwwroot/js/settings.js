@@ -8,11 +8,11 @@
         const [settings, catalogs] = await Promise.all([api("/settings"), ui.loadCatalogs()]);
         catalog = catalogs;
         settingsForm.elements.name.value = settings.name;
-        settingsForm.elements.openingBalance.value = (settings.openingBalanceCents / 100).toFixed(2);
-        settingsForm.elements.openingDate.value = settings.openingDate;
-        settingsForm.elements.reserve.value = (settings.reserveCents / 100).toFixed(2);
-        rows("category-rows", catalogs.categories.map(category => `<tr><td>${escape(category.name)}</td><td>${escape(ui.label(category.kind))}</td><td>${editButton(category.id)}</td></tr>`).join(""), 3);
-        for (const [key, id] of [["channels", "channel-rows"], ["paymentMethods", "payment-rows"]]) rows(id, catalogs[key].map(item => `<tr><td>${escape(item.name)}</td><td>${(item.rateBasisPoints / 100).toLocaleString("pt-BR")}%</td><td class="money">${money(item.fixedFeeCents)}</td><td>${editButton(item.id)}</td></tr>`).join(""));
+        settingsForm.elements.openingBalance.value = ui.decimalInput(settings.openingBalanceCents / 100);
+        settingsForm.elements.openingDate.value = ui.dateToInput(settings.openingDate);
+        settingsForm.elements.reserve.value = ui.decimalInput(settings.reserveCents / 100);
+        rows("category-rows", catalogs.categories.map(category => `<tr><td>${escape(category.name)}</td><td>${escape(ui.label(category.kind))}</td><td>${editButton(category.id)}</td></tr>`).join(""), 3, "Nenhuma categoria cadastrada.");
+        for (const [key, id, empty] of [["channels", "channel-rows", "Nenhum canal cadastrado."], ["paymentMethods", "payment-rows", "Nenhuma forma de pagamento cadastrada."]]) rows(id, catalogs[key].map(item => `<tr><td>${escape(item.name)}</td><td>${(item.rateBasisPoints / 100).toLocaleString("pt-BR")}%</td><td class="money">${money(item.fixedFeeCents)}</td><td>${editButton(item.id)}</td></tr>`).join(""), 4, empty);
     }
     ui.listenForm("settings-form", async value => {
         await api("/settings", "PUT", { name: value.name, openingDate: value.openingDate, openingBalanceCents: cents(value.openingBalance), reserveCents: cents(value.reserve) });
@@ -38,8 +38,8 @@
         const item = catalog[key].find(item => item.id === id);
         const value = await ui.ask("Editar cadastro e taxas", [
             { name: "name", label: "Nome", value: item.name },
-            { name: "rate", label: "Taxa percentual %", type: "number", value: (item.rateBasisPoints / 100).toFixed(2) },
-            { name: "fixed", label: "Taxa fixa em R$", type: "number", value: (item.fixedFeeCents / 100).toFixed(2) }
+            { name: "rate", label: "Taxa percentual", type: "number", value: item.rateBasisPoints / 100 },
+            { name: "fixed", label: "Taxa fixa", type: "number", value: item.fixedFeeCents / 100 }
         ]);
         if (!value) return;
         await api(`${endpoint}/${id}`, "PUT", { name: value.name, rateBasisPoints: cents(value.rate), fixedFeeCents: cents(value.fixed) }); await load(); notify("Cadastro atualizado. Vendas antigas mantêm as taxas anteriores.");
