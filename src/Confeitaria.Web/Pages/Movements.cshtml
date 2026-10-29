@@ -1,13 +1,20 @@
 @page
 @{ ViewData["Title"] = "Lançamentos"; }
-<div class="page-heading">
+<div class="page-heading page-heading-movements">
     <div class="page-heading-copy">
         <p class="eyebrow">Rotina financeira</p>
         <h1>Lançamentos</h1>
         <p>Registre as vendas do dia e acompanhe o que entra e sai do caixa.</p>
     </div>
+    <a class="button" href="#sale-section">+ Registrar venda</a>
 </div>
-<section>
+<nav class="section-index movement-index" aria-label="Atalhos de lançamentos">
+    <a href="#sale-section">Registrar venda</a>
+    <a href="#expense-section">Registrar despesa</a>
+    <a href="#owner-section">Aporte ou retirada</a>
+    <a href="#movement-history">Histórico</a>
+</nav>
+<section id="sale-section" class="entry-section entry-sale">
     <h2>Registrar uma venda</h2>
     <p class="hint">Comece com data, valor, canal e forma de pagamento. Os detalhes de custo são opcionais.</p>
     <form id="sale-form">
@@ -35,7 +42,7 @@
     </form>
 </section>
 <div class="split">
-<section>
+<section id="expense-section" class="entry-section entry-expense">
     <h2>Registrar uma despesa</h2>
     <form id="expense-form">
         <div class="grid">
@@ -49,7 +56,7 @@
         <div class="actions"><button type="submit">Registrar despesa pendente</button></div>
     </form>
 </section>
-<section>
+<section id="owner-section" class="entry-section entry-owner">
     <h2>Aporte ou retirada</h2>
     <form id="owner-form">
         <div class="grid">
@@ -63,7 +70,7 @@
     </form>
 </section>
 </div>
-<section>
+<section id="movement-history" class="movement-history">
     <h2>Histórico de lançamentos</h2>
     <form id="movement-filter"><div class="grid filters">
         <label>De<input type="text" name="from" data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" /></label><label>Até<input type="text" name="to" data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" /></label>

@@ -1,6 +1,6 @@
 @page "/"
 @{ ViewData["Title"] = "Painel"; }
-<div class="page-heading">
+<div class="page-heading page-heading-dashboard">
     <div class="page-heading-copy">
         <p class="eyebrow">Visão do negócio</p>
         <h1>Visão geral da sua confeitaria</h1>
@@ -8,7 +8,7 @@
     </div>
     <a class="button" href="/Movements#sale-form">+ Registrar venda</a>
 </div>
-<section aria-labelledby="filter-title">
+<section class="dashboard-filters" aria-labelledby="filter-title">
     <h2 id="filter-title">Resumo do período</h2>
     <form id="dashboard-filter">
         <div class="grid filters dashboard-basic-filters">
@@ -28,12 +28,12 @@
     </form>
 </section>
 <div class="dashboard-section-title"><h2>Indicadores principais</h2><span class="hint">Valores atualizados para o período selecionado</span></div>
-<div id="dashboard-primary-cards" class="cards" aria-live="polite"><p class="loading">Carregando resumo…</p></div>
+<div id="dashboard-primary-cards" class="cards dashboard-primary-metrics" aria-live="polite"><p class="loading">Carregando resumo…</p></div>
 <details class="secondary-metrics">
     <summary>Ver todos os indicadores financeiros</summary>
     <div id="dashboard-cards" class="cards" aria-live="polite"></div>
 </details>
-<section><h2>Avisos e atenção</h2><ul class="notices" id="dashboard-notices"><li>Carregando…</li></ul></section>
-<section><h2>Vendas por canal</h2><p class="hint">Compare as vendas líquidas. A margem considera os custos informados, antes das despesas operacionais gerais.</p><div id="channel-chart" class="channel-chart" role="list" aria-label="Comparação de vendas líquidas por canal"></div><div class="table-wrap"><table><thead><tr><th>Canal</th><th class="money">Vendas líquidas</th><th class="money">Margem antes de despesas</th><th>Custos informados</th></tr></thead><tbody id="channel-totals"></tbody></table></div></section>
-<section><h2>Movimentações de caixa</h2><p class="hint">A data de recebimento ou pagamento é usada nesta consulta. O resumo não cria novos lançamentos.</p><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="money">Valor</th></tr></thead><tbody id="ledger-rows"></tbody></table></div><p id="ledger-count" class="hint"></p></section>
+<section class="dashboard-notice"><h2>Avisos e atenção</h2><ul class="notices" id="dashboard-notices"><li>Carregando…</li></ul></section>
+<section class="dashboard-channel"><h2>Vendas por canal</h2><p class="hint">Compare as vendas líquidas. A margem considera os custos informados, antes das despesas operacionais gerais.</p><div id="channel-chart" class="channel-chart" role="list" aria-label="Comparação de vendas líquidas por canal"></div><div class="table-wrap"><table><thead><tr><th>Canal</th><th class="money">Vendas líquidas</th><th class="money">Margem antes de despesas</th><th>Custos informados</th></tr></thead><tbody id="channel-totals"></tbody></table></div></section>
+<section class="dashboard-ledger"><h2>Movimentações de caixa</h2><p class="hint">A data de recebimento ou pagamento é usada nesta consulta. O resumo não cria novos lançamentos.</p><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="money">Valor</th></tr></thead><tbody id="ledger-rows"></tbody></table></div><p id="ledger-count" class="hint"></p></section>
 @section Scripts { <script src="~/js/dashboard.js" asp-append-version="true"></script> }

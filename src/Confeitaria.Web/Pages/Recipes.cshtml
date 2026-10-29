@@ -1,6 +1,6 @@
 @page
 @{ ViewData["Title"] = "Receitas e preços"; }
-<div class="page-heading">
+<div class="page-heading page-heading-recipes">
     <div class="page-heading-copy">
         <p class="eyebrow">Ficha técnica</p>
         <h1>Receitas e preços</h1>
@@ -12,7 +12,7 @@
     <a href="#recipe-editor">2. Ficha técnica</a>
     <a href="#saved-recipes">3. Receitas</a>
 </nav>
-<section id="ingredients-section">
+<section id="ingredients-section" class="recipe-section ingredient-section">
     <h2>1. Cadastre seus ingredientes</h2>
     <p class="hint">Informe a quantidade e o preço da embalagem. O sistema calcula o custo proporcional usado em cada receita.</p>
     <form id="ingredient-form"><input name="id" type="hidden" /><div class="grid">
@@ -23,7 +23,7 @@
     </div><div class="actions"><button type="submit">Salvar ingrediente</button><button type="button" class="secondary" id="ingredient-new">Limpar</button></div></form>
     <div class="table-wrap spaced"><table><thead><tr><th>Ingrediente</th><th>Embalagem em unidade-base</th><th class="money">Preço</th><th>Ações</th></tr></thead><tbody id="ingredient-rows"></tbody></table></div><p id="ingredient-list-info" class="hint"></p>
 </section>
-<section id="recipe-editor">
+<section id="recipe-editor" class="recipe-section recipe-builder">
     <h2>2. Monte a ficha técnica</h2>
     <p class="hint">Defina o rendimento do lote, adicione os ingredientes e inclua embalagem e mão de obra para chegar a um custo mais completo.</p>
     <form id="recipe-form"><input name="id" type="hidden" /><div class="grid">
@@ -43,8 +43,8 @@
     </div><p class="hint">Perda estimada participa do cálculo de preço, sem gerar saída no caixa. Custos já incluídos nas receitas não devem ser descontados novamente como despesas operacionais.</p>
     <div class="actions"><button type="submit">Salvar receita e calcular custo</button><button type="button" class="secondary" id="recipe-new">Nova receita</button></div></form>
 </section>
-<section id="saved-recipes"><h2>3. Suas receitas</h2><div class="table-wrap"><table><thead><tr><th>Receita</th><th>Rendimento</th><th>Ações</th></tr></thead><tbody id="recipe-rows"></tbody></table></div><p id="recipe-list-info" class="hint"></p></section>
-<section id="cost-section" hidden><h2 id="cost-title">Custo da receita</h2><div id="cost-cards" class="cards"></div><h3>Memória dos ingredientes</h3><div class="table-wrap"><table><thead><tr><th>Ingrediente</th><th>Quantidade usada</th><th>Embalagem</th><th class="money">Preço da embalagem</th><th class="money">Custo proporcional</th></tr></thead><tbody id="cost-lines"></tbody></table></div><p class="hint">O total usa os valores proporcionais antes do arredondamento. A soma das linhas exibidas pode diferir em centavos.</p>
+<section id="saved-recipes" class="recipe-section saved-recipes"><h2>3. Suas receitas</h2><div class="table-wrap"><table><thead><tr><th>Receita</th><th>Rendimento</th><th>Ações</th></tr></thead><tbody id="recipe-rows"></tbody></table></div><p id="recipe-list-info" class="hint"></p></section>
+<section id="cost-section" class="recipe-cost-section" hidden><h2 id="cost-title">Custo da receita</h2><div id="cost-cards" class="cards"></div><h3>Memória dos ingredientes</h3><div class="table-wrap"><table><thead><tr><th>Ingrediente</th><th>Quantidade usada</th><th>Embalagem</th><th class="money">Preço da embalagem</th><th class="money">Custo proporcional</th></tr></thead><tbody id="cost-lines"></tbody></table></div><p class="hint">O total usa os valores proporcionais antes do arredondamento. A soma das linhas exibidas pode diferir em centavos.</p>
     <h3>Simular preço por unidade</h3><form id="price-form"><input name="recipeId" type="hidden" /><div class="grid">
         <label>Margem desejada sobre a venda %<input name="margin" type="text" inputmode="decimal" class="decimal-input" value="30,00" required /><span class="hint">Percentual do preço final que deseja manter após os custos.</span></label>
         <label>Taxas sobre a venda %<input name="salesRate" type="text" inputmode="decimal" class="decimal-input" value="0,00" required /><span class="hint">Informe as taxas e impostos aplicáveis ao seu negócio.</span></label>
