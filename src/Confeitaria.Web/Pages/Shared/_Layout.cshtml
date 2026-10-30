@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewData["Title"] · Confeitaria</title>
-    <script>document.documentElement.classList.add(localStorage.getItem("confeitaria-design") === "classic" ? "design-classic" : "design-gere-doce");</script>
+    <script>document.documentElement.classList.add("design-gere-doce");</script>
     <link rel="icon" type="image/png" href="~/images/gere-doce-mascot.png" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
@@ -14,9 +14,12 @@
         <div class="loader-illustration" aria-hidden="true">
             <img src="~/images/gere-doce-chef.png" alt="" />
         </div>
+        <span class="loader-kicker">CONFEITARIA ARTESANAL</span>
         <p class="loader-brand">Gere <span>Doce</span></p>
-        <p class="loader-message">Preparando sua confeitaria</p>
+        <p class="loader-message">Preparando seu espaço</p>
+        <p class="loader-caption">Organizando suas receitas e lançamentos para você.</p>
         <div class="loader-progress" aria-hidden="true"><span></span></div>
+        <span class="loader-status" aria-hidden="true">Só um instante</span>
         <span class="visually-hidden">Aguarde enquanto os dados são carregados.</span>
     </div>
 </div>
@@ -28,7 +31,11 @@
         </span>
         <span class="brand-copy"><strong>Gere <span>Doce</span></strong><span>Confeitaria artesanal</span></span>
     </a>
-    <nav aria-label="Navegação principal">
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+        <span class="mobile-menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="mobile-menu-label">Menu</span>
+    </button>
+    <nav id="primary-navigation" aria-label="Navegação principal">
         <a href="/" data-nav-label="Painel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 10 8.5-7 8.5 7v10a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-7h6v7"/></svg><span>Painel</span></a>
         <a href="/Movements" data-nav-label="Lançamentos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h8l4 4V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path d="M14.5 3.5v5h5M8.5 13h7M8.5 17h7"/></svg><span>Lançamentos</span></a>
         <a href="/Recipes" data-nav-label="Receitas e preços"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h16l-2 8H6l-2-8Z"/><path d="M6 13c0-2 1.5-3.5 3.5-3.5.5-2.2 2.2-3.5 4-3.5 2.2 0 4 1.7 4 4 1.6.1 2.5 1.2 2.5 3H6Z"/><path d="M10 17v1m4-1v1"/></svg><span>Receitas e preços</span></a>
@@ -42,10 +49,6 @@
                 </div>
             </details>
         }
-        <button type="button" class="theme-switch" id="design-toggle" aria-pressed="true">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 11.6-2L20 12M4 12l2.9 5a7 7 0 0 0 11.6-2"/></svg>
-            <span>Voltar ao visual anterior</span>
-        </button>
     </nav>
 </header>
 <main id="conteudo" aria-busy="true">

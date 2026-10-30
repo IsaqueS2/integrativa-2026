@@ -25,6 +25,7 @@ Criação retorna `201` e entidade com `id`. Atualizações/ações retornam `20
 | Ingredientes | `GET`, `POST /ingredients`; `GET`, `PUT /ingredients/{id}` |
 | Receitas | `GET`, `POST /recipes`; `GET`, `PUT /recipes/{id}` |
 | Custo e preço | `GET /recipes/{id}/cost`; `POST /recipes/{id}/price` |
+| Importação de compras | `POST /purchase-imports/preview`, `/purchase-imports/commit` (multipart/form-data) |
 
 Filtros financeiros: `from`, `to`, `channelId`, `paymentMethodId`, `categoryId`. Vendas/despesas também aceitam `status`. Paginação: `page`, `pageSize`. As exportações preservam os filtros e ignoram paginação. O relatório HTML inclui resumo, vendas por canal e movimentações; use “Imprimir / Salvar em PDF” e escolha “Salvar como PDF” no navegador.
 
@@ -90,7 +91,7 @@ Caixa e projeção são **globais até `to`**, sem filtros de canal/categoria; u
 
 ## Ingredientes e receitas
 
-Ingrediente: `{ "name":"Chocolate", "unit":"kg", "packageQuantity":1, "packagePriceCents":2000 }`. Unidades: `g`, `kg`, `ml`, `l`, `un`; resposta usa unidade/quantidade canônica. Massa e volume não se convertem entre si.
+Ingrediente: `{ "name":"Chocolate", "unit":"kg", "packageQuantity":1, "packagePriceCents":2000 }`. Unidades: `g`, `kg`, `ml`, `l`, `un`; resposta usa unidade/quantidade canônica e inclui `stockQuantity`, que é `null` para ingredientes sem controle de estoque. Massa e volume não se convertem entre si.
 
 Receita:
 
@@ -106,6 +107,30 @@ Receita:
 Extras são do lote inteiro; perda é um acréscimo sobre ingredientes e não movimenta caixa. `/cost` retorna componentes, linhas, total e custo unitário, com observação de arredondamento. A soma de linhas visualmente arredondadas pode diferir do subtotal, calculado antes de arredondar. O campo `roundingNote` explica a política.
 
 `POST /recipes/{id}/price`: `{ "marginBasisPoints":5000, "salesRateBasisPoints":0, "fixedFeeCents":0 }`. Retorno inclui `suggestedPriceCents` e `markupBasisPoints`; margem e markup são distintos. Taxa fixa é por unidade nesta simulação. Percentuais somados devem ser inferiores a 100%.
+
+### Importação de compras e estoque
+
+Os endpoints ficam sob `/api/v1/purchase-imports`. Envie o arquivo no campo multipart `file` para a prévia; o campo deve usar o nome do arquivo com extensão `.xml`, `.pdf`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.tif`, `.tiff` ou `.webp`. O limite é 10 MB por arquivo e PDFs podem ter até 20 páginas. XML de NF-e e PDF com texto são extraídos diretamente; imagens e PDFs digitalizados passam por OCR local, sem envio do documento a serviços externos.
+
+`POST /purchase-imports/preview` retorna `documentHash`, `format`, dados da compra e `items` com `name`, `quantity`, `unit`, `totalCents` e `ingredientId` sugerido (ou `null`). A leitura por OCR pode estar incorreta; permita editar cada campo e associar o ingrediente correto antes da confirmação.
+
+`POST /purchase-imports/commit` recebe o mesmo arquivo revisado no campo `file` e um campo `request` contendo JSON:
+
+```json
+{
+  "documentHash":"<hash retornado na prévia>",
+  "accessKey":"<chave de acesso ou null>",
+  "invoiceNumber":"123",
+  "supplier":"Fornecedor",
+  "purchaseDate":"2026-10-26",
+  "totalCents":4000,
+  "items":[
+    {"name":"Farinha","quantity":2,"unit":"kg","totalCents":4000,"ingredientId":null}
+  ]
+}
+```
+
+O hash precisa corresponder ao arquivo reenviado. Uma confirmação bem-sucedida responde `201`, cria uma despesa `Supplies`, atualiza o custo do pacote, soma o estoque e registra hash/chave fiscal para bloquear duplicidades. Nenhuma gravação ocorre na prévia. O arquivo original não é armazenado. Vendas com `recipeId` baixam o estoque dos ingredientes controlados; ingredientes com `stockQuantity: null` não têm estoque controlado. Estoque insuficiente rejeita a venda, e cancelar a venda restaura as quantidades consumidas.
 
 ## Front-end definitivo
 

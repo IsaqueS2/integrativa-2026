@@ -9,6 +9,7 @@ public class Ingredient : Entity
     // One canonical g, mL or unit is represented by 1,000,000 micros.
     public long PackageQuantityMicros { get; set; }
     public long PackagePriceCents { get; set; }
+    public long? StockQuantityMicros { get; set; }
 }
 
 public class Recipe : Entity
@@ -29,4 +30,15 @@ public class RecipeItem : Entity
     public int RecipeId { get; set; }
     public int IngredientId { get; set; }
     public long QuantityMicros { get; set; }
+}
+
+public class PurchaseDocument : Entity
+{
+    public string DocumentHash { get; set; } = "";
+    public string? AccessKey { get; set; }
+    public string? InvoiceNumber { get; set; }
+    public string Supplier { get; set; } = "";
+    public DateOnly PurchaseDate { get; set; }
+    public long TotalCents { get; set; }
+    public int ExpenseId { get; set; }
 }

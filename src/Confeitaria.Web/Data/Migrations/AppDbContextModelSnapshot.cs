@@ -248,6 +248,9 @@ namespace Confeitaria.Web.Data.Migrations
                     b.Property<long>("PackageQuantityMicros")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long?>("StockQuantityMicros")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
@@ -258,7 +261,7 @@ namespace Confeitaria.Web.Data.Migrations
 
                     b.ToTable("Ingredients", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Ingredient_Amounts", "PackageQuantityMicros > 0 AND PackagePriceCents >= 0 AND Dimension BETWEEN 0 AND 2");
+                            t.HasCheckConstraint("CK_Ingredient_Amounts", "PackageQuantityMicros > 0 AND PackagePriceCents >= 0 AND (StockQuantityMicros IS NULL OR StockQuantityMicros >= 0) AND Dimension BETWEEN 0 AND 2");
                         });
                 });
 
@@ -292,6 +295,62 @@ namespace Confeitaria.Web.Data.Migrations
                     b.ToTable("PaymentMethods", null, t =>
                         {
                             t.HasCheckConstraint("CK_Payment_Fees", "RateBasisPoints BETWEEN 0 AND 10000 AND FixedFeeCents >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Confeitaria.Web.Domain.PurchaseDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AccessKey")
+                        .HasMaxLength(44)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DocumentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ExpenseId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("InvoiceNumber")
+                        .HasMaxLength(40)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("PurchaseDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Supplier")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("TotalCents")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessKey")
+                        .IsUnique();
+
+                    b.HasIndex("DocumentHash")
+                        .IsUnique();
+
+                    b.HasIndex("ExpenseId")
+                        .IsUnique();
+
+                    b.ToTable("PurchaseDocuments", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_PurchaseDocument_Values", "length(DocumentHash) = 64 AND TotalCents > 0");
                         });
                 });
 
@@ -444,6 +503,9 @@ namespace Confeitaria.Web.Data.Migrations
                     b.Property<int?>("RecipeId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("StockConsumptionJson")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
@@ -493,6 +555,15 @@ namespace Confeitaria.Web.Data.Migrations
                         .WithMany()
                         .HasForeignKey("PaymentMethodId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Confeitaria.Web.Domain.PurchaseDocument", b =>
+                {
+                    b.HasOne("Confeitaria.Web.Domain.Expense", null)
+                        .WithMany()
+                        .HasForeignKey("ExpenseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Confeitaria.Web.Domain.RecipeItem", b =>

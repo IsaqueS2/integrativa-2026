@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Confeitaria.Web.Services;
 
-public class FinanceService(AppDbContext db, IServiceProvider services)
+public class FinanceService(AppDbContext db, IServiceProvider services, IRecipeStockProvider stockProvider)
 {
     public BusinessSettings Settings() => db.Settings.Single();
     public BusinessSettings UpdateSettings(SettingsRequest r)
@@ -50,6 +50,7 @@ public class FinanceService(AppDbContext db, IServiceProvider services)
     }
     public Sale CreateSale(SaleRequest r)
     {
+        using var tx = r.RecipeId.HasValue ? db.Database.BeginTransaction() : null;
         Rules.Date(r.Date); Rules.Require(r.Date >= Settings().OpeningDate, "Venda anterior à abertura do negócio.");
         Rules.Money(r.GrossCents); Rules.Money(r.DiscountCents, true);
         Rules.Require(r.DiscountCents <= r.GrossCents, "Desconto maior que a venda.");
@@ -61,20 +62,22 @@ public class FinanceService(AppDbContext db, IServiceProvider services)
         if (r.FeeOverrideCents.HasValue)
         { fee = r.FeeOverrideCents.Value; Rules.Money(fee, true); Rules.Require(fee <= r.GrossCents - r.DiscountCents, "Taxa efetiva maior que a venda."); }
         else fee = CalculateFee(r.GrossCents, r.DiscountCents, rate, fixedFee);
-        long? cost = r.DirectCostCents; string? snapshot = null;
+        long? cost = r.DirectCostCents; string? snapshot = null; string? stockConsumption = null;
         Rules.Require(!(r.RecipeId.HasValue && cost.HasValue), "Escolha custo manual ou receita, nunca os dois.");
         if (r.RecipeId.HasValue)
         {
             var provider = services.GetService<IRecipeCostProvider>() ?? throw new DomainException("Módulo de receitas indisponível.");
             var calculated = provider.GetSaleCost(r.RecipeId.Value, r.RecipeUnits); cost = calculated.TotalCostCents; snapshot = calculated.SnapshotJson;
+            stockConsumption = stockProvider.ConsumeForSale(r.RecipeId.Value, r.RecipeUnits);
         }
         if (cost.HasValue) Rules.Money(cost.Value, true);
         var due = r.DueDate ?? r.Date; Rules.Require(due >= r.Date && due.Year <= 2100, "Previsão de recebimento inválida.");
         var sale = new Sale { Date = r.Date, DueDate = due, ChannelId = r.ChannelId, PaymentMethodId = r.PaymentMethodId,
             GrossCents = r.GrossCents, DiscountCents = r.DiscountCents, EstimatedFeeCents = fee,
             RateBasisPointsSnapshot = rate, FixedFeeCentsSnapshot = fixedFee, DirectCostCents = cost,
-            RecipeId = r.RecipeId, CostSnapshotJson = snapshot, Description = Rules.Description(r.Description), Consolidated = r.Consolidated };
-        db.Sales.Add(sale); db.SaveChanges(); return sale;
+            RecipeId = r.RecipeId, CostSnapshotJson = snapshot, StockConsumptionJson = stockConsumption,
+            Description = Rules.Description(r.Description), Consolidated = r.Consolidated };
+        db.Sales.Add(sale); db.SaveChanges(); tx?.Commit(); return sale;
     }
     public Sale Receive(int id, ReceiptRequest r)
     {
@@ -97,6 +100,7 @@ public class FinanceService(AppDbContext db, IServiceProvider services)
         if (sale.CancelledOn != null) { RequireSameCancellation(sale.CancelledOn, sale.CancellationReason, r); return sale; }
         ValidateCashDate(r.Date, sale.ReceivedOn ?? sale.Date);
         sale.CancellationReason = Rules.Name(r.Reason); sale.CancelledOn = r.Date;
+        stockProvider.RestoreForSale(sale.StockConsumptionJson);
         var entry = db.CashEntries.SingleOrDefault(x => x.SaleId == id);
         if (entry != null) { entry.ReversedOn = r.Date; entry.ReversalReason = sale.CancellationReason; }
         db.SaveChanges(); tx.Commit(); return sale;

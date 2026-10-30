@@ -7,16 +7,49 @@
         <p>Monte a ficha técnica, conheça o custo por unidade e simule um preço para valorizar seu trabalho.</p>
     </div>
 </div>
+<details id="purchase-import-option" class="page-option">
+    <summary>Importar uma nota de compra</summary>
+    <section class="recipe-section purchase-import-section">
+        <h2>Importar compra de insumos</h2>
+        <p class="hint">Anexe o XML da NF-e, um PDF ou uma foto. A leitura é feita localmente; confira e ajuste os campos antes de gravar a despesa e atualizar o estoque.</p>
+        <form id="purchase-import-form">
+            <label>Documento da compra<input type="file" name="file" accept=".xml,.pdf,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp" required /></label>
+            <div class="actions"><button type="submit">Ler documento</button></div>
+        </form>
+        <section id="purchase-import-review" class="purchase-import-review" hidden>
+            <h3>Revise os dados extraídos</h3>
+            <p id="purchase-import-notice" class="hint" role="status"></p>
+            <div class="grid">
+                <label>Fornecedor<input id="purchase-supplier" maxlength="120" required /></label>
+                <label>Número da nota<input id="purchase-invoice-number" maxlength="40" /></label>
+                <label>Data da compra<input id="purchase-date" type="date" required /></label>
+                <label>Total da nota<input id="purchase-total" type="text" inputmode="decimal" class="decimal-input" required /></label>
+            </div>
+            <h4>Itens e valores</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Insumo/produto</th><th>Quantidade</th><th>Unidade</th><th class="money">Valor do item</th><th>Ingrediente no sistema</th><th>Ações</th></tr></thead>
+                    <tbody id="purchase-import-rows"></tbody>
+                </table>
+            </div>
+            <div class="actions">
+                <button type="button" class="secondary" id="purchase-add-line">Adicionar item</button>
+                <button type="button" id="purchase-confirm">Confirmar importação</button>
+                <button type="button" class="secondary" id="purchase-cancel">Cancelar</button>
+            </div>
+        </section>
+    </section>
+</details>
 <details id="ingredients-option" class="page-option"><summary>Ingredientes e embalagens</summary><section id="ingredients-section" class="recipe-section ingredient-section">
     <h2>1. Cadastre seus ingredientes</h2>
-    <p class="hint">Informe a quantidade e o preço da embalagem. O sistema calcula o custo proporcional usado em cada receita.</p>
+    <p class="hint">Informe a quantidade e o preço da embalagem. O sistema calcula o custo proporcional usado em cada receita. Compras importadas também atualizam o estoque acompanhado pelo sistema.</p>
     <form id="ingredient-form"><input name="id" type="hidden" /><div class="grid">
         <label>Nome<input name="name" maxlength="120" required /></label>
         <label>Quantidade da embalagem<input name="packageQuantity" type="number" min="0.001" step="0.001" required /></label>
         <label>Unidade da embalagem<select name="unit"><option value="g">g</option><option value="kg">kg</option><option value="ml">mL</option><option value="l">L</option><option value="un">unidade</option></select></label>
         <label>Preço da embalagem<input type="text" inputmode="decimal" class="decimal-input" name="packagePrice" placeholder="Ex.: 18,90" required /></label>
     </div><div class="actions"><button type="submit">Salvar ingrediente</button><button type="button" class="secondary" id="ingredient-new">Limpar</button></div></form>
-    <div class="table-wrap spaced"><table><thead><tr><th>Ingrediente</th><th>Embalagem em unidade-base</th><th class="money">Preço</th><th>Ações</th></tr></thead><tbody id="ingredient-rows"></tbody></table></div><p id="ingredient-list-info" class="hint"></p>
+    <div class="table-wrap spaced"><table><thead><tr><th>Ingrediente</th><th>Embalagem em unidade-base</th><th class="money">Preço</th><th>Estoque acompanhado</th><th>Ações</th></tr></thead><tbody id="ingredient-rows"></tbody></table></div><p id="ingredient-list-info" class="hint"></p>
 </section></details>
 <section id="recipe-editor" class="recipe-section recipe-builder">
     <h2>2. Monte a ficha técnica</h2>
@@ -27,6 +60,7 @@
         <label>Unidade de rendimento<input name="yieldUnit" maxlength="30" value="un" required /></label>
     </div>
     <h3>Ingredientes usados no lote</h3>
+    <p id="recipe-ingredient-guidance" class="hint" hidden>Cadastre seus ingredientes antes de montar a ficha técnica. <a href="#ingredients-option" data-expand-target="ingredients-option">Abrir cadastro de ingredientes</a>.</p>
     <div class="table-wrap"><table><thead><tr><th>Ingrediente</th><th>Quantidade</th><th>Unidade usada</th><th>Ações</th></tr></thead><tbody id="recipe-items"></tbody></table></div>
     <div class="actions"><button type="button" class="secondary" id="add-recipe-item">Adicionar ingrediente</button></div>
     <h3>Custos adicionais do lote</h3><div class="grid">
@@ -48,6 +82,7 @@
 </section>
 @section Scripts { <script src="~/js/recipes.js" asp-append-version="true"></script> }
 @section PageOptions {
+    <a href="#purchase-import-option" data-expand-target="purchase-import-option">Importar compra</a>
     <a href="#ingredients-option" data-expand-target="ingredients-option">Ingredientes e embalagens</a>
     <a href="#saved-recipes-option" data-expand-target="saved-recipes-option">Receitas salvas</a>
 }

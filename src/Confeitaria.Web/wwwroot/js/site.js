@@ -45,6 +45,33 @@ window.ui = (() => {
             showPageLoader();
         });
     }
+    const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+    const primaryNavigation = document.getElementById("primary-navigation");
+    if (mobileMenuToggle && primaryNavigation) {
+        const mobileBreakpoint = window.matchMedia("(max-width: 1023px)");
+        const setMenuOpen = open => {
+            mobileMenuToggle.setAttribute("aria-expanded", String(open));
+            mobileMenuToggle.querySelector(".mobile-menu-label").textContent = open ? "Fechar" : "Menu";
+            primaryNavigation.classList.toggle("is-open", open);
+        };
+        mobileMenuToggle.addEventListener("click", () => {
+            setMenuOpen(mobileMenuToggle.getAttribute("aria-expanded") !== "true");
+        });
+        primaryNavigation.addEventListener("click", event => {
+            if (event.target instanceof Element && event.target.closest("a[href]") && mobileBreakpoint.matches)
+                setMenuOpen(false);
+        });
+        document.addEventListener("click", event => {
+            if (mobileBreakpoint.matches && mobileMenuToggle.getAttribute("aria-expanded") === "true" &&
+                event.target instanceof Node && !primaryNavigation.contains(event.target) && !mobileMenuToggle.contains(event.target))
+                setMenuOpen(false);
+        });
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && mobileMenuToggle.getAttribute("aria-expanded") === "true")
+                setMenuOpen(false);
+        });
+        mobileBreakpoint.addEventListener("change", () => setMenuOpen(false));
+    }
     const moneyFormat = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
     const today = () => {
         const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
@@ -99,7 +126,12 @@ window.ui = (() => {
     }
     const clearNotice = () => { document.getElementById("message").hidden = true; };
     async function api(path, method = "GET", body) {
-        const response = await fetch(`/api/v1${path}`, { method, headers: body === undefined ? {} : { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+        const isFormData = body instanceof FormData;
+        const response = await fetch(`/api/v1${path}`, {
+            method,
+            headers: body === undefined || isFormData ? {} : { "Content-Type": "application/json" },
+            body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body)
+        });
         const text = await response.text();
         let payload = null;
         try { payload = text ? JSON.parse(text) : null; } catch { payload = { detail: text }; }
@@ -168,23 +200,6 @@ window.ui = (() => {
     const targetFromHash = document.getElementById(decodeURIComponent(location.hash.slice(1)));
     if (targetFromHash instanceof HTMLDetailsElement && targetFromHash.classList.contains("page-option"))
         targetFromHash.open = true;
-    const designToggle = document.getElementById("design-toggle");
-    const isGereDoceDesign = () => document.documentElement.classList.contains("design-gere-doce");
-    if (designToggle) {
-        const updateDesignToggle = () => {
-            const active = isGereDoceDesign();
-            designToggle.setAttribute("aria-pressed", String(active));
-            designToggle.querySelector("span").textContent = active ? "Voltar ao visual anterior" : "Usar identidade Gere Doce";
-        };
-        updateDesignToggle();
-        designToggle.addEventListener("click", () => {
-            const useGereDoceDesign = !isGereDoceDesign();
-            document.documentElement.classList.toggle("design-gere-doce", useGereDoceDesign);
-            document.documentElement.classList.toggle("design-classic", !useGereDoceDesign);
-            localStorage.setItem("confeitaria-design", useGereDoceDesign ? "gere-doce" : "classic");
-            updateDesignToggle();
-        });
-    }
     function bindAction(id, handler) {
         document.getElementById(id).addEventListener("click", async event => {
             const button = event.target.closest("button[data-action]");

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Confeitaria.Web.Services;
 
-public class RecipeService(AppDbContext db) : IRecipeCostProvider
+public class RecipeService(AppDbContext db) : IRecipeCostProvider, IRecipeStockProvider
 {
     public const long QuantityScale = 1_000_000;
     private const long MaxQuantityMicros = 1_000_000_000_000;
@@ -124,6 +124,46 @@ public class RecipeService(AppDbContext db) : IRecipeCostProvider
         return new RecipeSaleCost(total, snapshot);
     }
 
+    public string? ConsumeForSale(int recipeId, decimal units)
+    {
+        var unitsMicros = Scaled(units, false, "A quantidade vendida");
+        var recipe = FindRecipe(recipeId, tracking: true);
+        var ingredientIds = recipe.Items.Select(x => x.IngredientId).ToArray();
+        var ingredients = db.Ingredients.Where(x => ingredientIds.Contains(x.Id)).ToDictionary(x => x.Id);
+        var consumption = new List<(Ingredient Ingredient, long QuantityMicros)>();
+        foreach (var item in recipe.Items)
+        {
+            var ingredient = ingredients[item.IngredientId];
+            if (ingredient.StockQuantityMicros is not { } available) continue;
+
+            var amount = decimal.Ceiling((decimal)item.QuantityMicros * unitsMicros / recipe.YieldQuantityMicros);
+            Rules.Require(amount <= long.MaxValue, "O consumo de estoque excede o limite permitido.");
+            var quantityMicros = checked((long)amount);
+            Rules.Require(available >= quantityMicros,
+                $"Estoque insuficiente de {ingredient.Name}. Disponível: {available / (decimal)QuantityScale:0.######}; necessário: {quantityMicros / (decimal)QuantityScale:0.######}.", 409);
+            consumption.Add((ingredient, quantityMicros));
+        }
+
+        foreach (var (ingredient, quantityMicros) in consumption)
+            ingredient.StockQuantityMicros = checked(ingredient.StockQuantityMicros!.Value - quantityMicros);
+        return consumption.Count == 0 ? null : JsonSerializer.Serialize(
+            consumption.Select(x => new StockConsumption(x.Ingredient.Id, x.QuantityMicros)));
+    }
+
+    public void RestoreForSale(string? stockConsumptionJson)
+    {
+        if (string.IsNullOrWhiteSpace(stockConsumptionJson)) return;
+        var consumption = JsonSerializer.Deserialize<List<StockConsumption>>(stockConsumptionJson, SnapshotOptions)
+            ?? throw new DomainException("O histórico de consumo de estoque está inválido.", 409);
+        foreach (var item in consumption)
+        {
+            var ingredient = db.Ingredients.SingleOrDefault(x => x.Id == item.IngredientId)
+                ?? throw new DomainException("Ingrediente do consumo não encontrado.", 409);
+            if (item.QuantityMicros <= 0) throw new DomainException("Quantidade de estoque do histórico inválida.", 409);
+            ingredient.StockQuantityMicros = checked((ingredient.StockQuantityMicros ?? 0) + item.QuantityMicros);
+        }
+    }
+
     public void SeedDemo()
     {
         if (db.Recipes.Any(x => x.Name == "Brigadeiro demonstrativo")) return;
@@ -176,7 +216,8 @@ public class RecipeService(AppDbContext db) : IRecipeCostProvider
     }
 
     private static IngredientResponse ToResponse(Ingredient ingredient) => new(ingredient.Id, ingredient.Name,
-        Unit(ingredient.Dimension), ingredient.PackageQuantityMicros / (decimal)QuantityScale, ingredient.PackagePriceCents);
+        Unit(ingredient.Dimension), ingredient.PackageQuantityMicros / (decimal)QuantityScale, ingredient.PackagePriceCents,
+        ingredient.StockQuantityMicros / (decimal)QuantityScale);
 
     public static (IngredientDimension Dimension, long Micros) ConvertQuantity(decimal quantity, string? unit)
     {
@@ -209,4 +250,6 @@ public class RecipeService(AppDbContext db) : IRecipeCostProvider
         Rules.Require(cents >= 0 && cents <= Rules.MaxMoney, "O custo calculado ultrapassa o intervalo permitido.");
         return Rules.Round(cents);
     }
+
+    private sealed record StockConsumption(int IngredientId, long QuantityMicros);
 }

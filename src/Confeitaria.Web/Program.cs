@@ -11,6 +11,8 @@ builder.Services.AddScoped<FinanceService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<IRecipeCostProvider>(sp => sp.GetRequiredService<RecipeService>());
+builder.Services.AddScoped<IRecipeStockProvider>(sp => sp.GetRequiredService<RecipeService>());
+builder.Services.AddScoped<PurchaseImportService>();
 builder.Services.AddRazorPages();
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 // Swagger resolves JSON contracts through MVC options, even for these minimal APIs.
@@ -55,8 +57,9 @@ if (app.Environment.IsDevelopment())
 }
 app.MapFinance();
 app.MapRecipes();
+app.MapPurchaseImports();
 app.MapRazorPages();
-app.MapGet("/health", () => Results.Ok(new { status = "ok", mode = "local-demo" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

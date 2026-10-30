@@ -8,7 +8,8 @@ Avaliação Integrativa UNIPLAC. API em C# com ASP.NET Core, Entity Framework Co
 - Contas a receber e a pagar, confirmação de recebimentos/pagamentos e estornos com histórico.
 - Aportes e retiradas pessoais separados das receitas e despesas do negócio.
 - Painel de caixa e resultado operacional estimado, filtros, resumo diário e exportações CSV e relatório colorido para PDF.
-- Cadastro de ingredientes e receitas, custo proporcional e precificação por margem.
+- Cadastro de ingredientes e receitas, custo proporcional, precificação por margem e controle de estoque consumido por vendas vinculadas a receitas.
+- Importação revisável de compras a partir de XML de NF-e, PDF ou imagem, com criação de despesa e atualização de ingredientes, custos e estoque após confirmação.
 - API REST documentada em OpenAPI e telas provisórias para testar os fluxos.
 
 ## Tecnologias
@@ -89,7 +90,7 @@ dotnet test
 
 Os testes usam SQLite real, migrações reais e bancos temporários independentes. Cobrem cálculo de taxas, concorrência/idempotência, estornos, caixa histórico, filtros, custos ausentes, precificação e preservação de custos antigos. Não alteram o banco demonstrativo.
 
-Última validação da implementação: **36 testes aprovados**, compilação sem avisos ou erros e documentação interativa conferida. O teste de contrato OpenAPI verifica que os enums documentados usam os mesmos nomes enviados pela API.
+Validação atual: **42 testes aprovados**, incluindo importação de compras, atualização/baixa/restauração de estoque e geração do documento OpenAPI.
 
 ## Organização
 
@@ -114,7 +115,14 @@ docs/           Modelo relacional e guia para o front-end
 4. Cadastre despesas e confirme pagamentos separadamente.
 5. Registre aportes e retiradas pessoais como movimentos próprios.
 6. Consulte painel, resumo do dia e exporte CSV ou relatório colorido para imprimir/salvar como PDF. Resumo é somente leitura: não cria outro lançamento.
-7. Cadastre ingredientes e receitas e simule preços. Receitas são opcionais para vendas rápidas.
+7. Cadastre ingredientes e receitas e simule preços. Receitas são opcionais para vendas rápidas. Compras importadas ficam como despesas `Supplies`; ao vender com receita, o estoque controlado é baixado e, ao cancelar a venda, a quantidade é restaurada.
+8. Em `/Recipes`, anexe XML de NF-e, PDF ou imagem para extrair uma prévia. Revise e edite os itens, unidades e ingredientes antes de confirmar. O sistema não envia o documento a serviços externos nem guarda o arquivo original; registra hash/chave fiscal para evitar importações repetidas.
+
+### Importação de compras e estoque
+
+São aceitos XML, PDF e imagens PNG, JPG/JPEG, TIFF, BMP ou WebP, limitados a 10 MB por arquivo. PDFs têm limite de 20 páginas. XML de NF-e e PDFs com texto são extraídos diretamente; PDFs digitalizados e imagens usam OCR local com o modelo português incluído em `src/Confeitaria.Web/tessdata/por.traineddata`. A leitura pode conter erros, por isso a prévia é editável e nada é gravado até a confirmação.
+
+A confirmação cria uma despesa na categoria `Supplies`, atualiza o custo do pacote e soma a quantidade ao estoque em uma transação. Ingredientes antigos sem controle de estoque permanecem com saldo nulo até serem vinculados a uma compra. A importação não substitui conferência fiscal ou contábil; valide valores, unidades e itens reconhecidos antes de confirmar.
 
 ## Dinheiro e taxas
 

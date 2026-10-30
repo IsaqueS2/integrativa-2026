@@ -49,6 +49,7 @@ public class Sale : Entity
     public long? DirectCostCents { get; set; }
     public int? RecipeId { get; set; }
     public string? CostSnapshotJson { get; set; }
+    [JsonIgnore] public string? StockConsumptionJson { get; set; }
     public string Description { get; set; } = "";
     public bool Consolidated { get; set; }
     public DateOnly? CancelledOn { get; set; }
