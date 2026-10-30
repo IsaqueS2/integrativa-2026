@@ -1,0 +1,4 @@
+@baseUrl = http://127.0.0.1:5080
+
+### Relatório financeiro formatado para impressão ou salvamento em PDF
+GET {{baseUrl}}/api/v1/exports/report.html?from=2026-01-01&to=2026-01-31

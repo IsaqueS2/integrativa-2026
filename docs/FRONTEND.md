@@ -21,12 +21,12 @@ Criação retorna `201` e entidade com `id`. Atualizações/ações retornam `20
 | Despesas | `GET`, `POST /expenses`; `GET /expenses/{id}`; `POST /expenses/{id}/pay`, `/cancel` |
 | Proprietária | `GET`, `POST /owner-movements`; `GET /owner-movements/{id}`; `POST /owner-movements/{id}/cancel` |
 | Consultas | `GET /dashboard`, `/ledger`, `/daily-summary?date=2026-10-26` |
-| CSV | `GET /exports/ledger.csv`, `/exports/summary.csv` |
+| Exportações | `GET /exports/ledger.csv`, `/exports/summary.csv` (CSV); `GET /exports/report.html` (relatório colorido para imprimir ou salvar como PDF) |
 | Ingredientes | `GET`, `POST /ingredients`; `GET`, `PUT /ingredients/{id}` |
 | Receitas | `GET`, `POST /recipes`; `GET`, `PUT /recipes/{id}` |
 | Custo e preço | `GET /recipes/{id}/cost`; `POST /recipes/{id}/price` |
 
-Filtros financeiros: `from`, `to`, `channelId`, `paymentMethodId`, `categoryId`. Vendas/despesas também aceitam `status`. Paginação: `page`, `pageSize`. CSV preserva os filtros e ignora paginação.
+Filtros financeiros: `from`, `to`, `channelId`, `paymentMethodId`, `categoryId`. Vendas/despesas também aceitam `status`. Paginação: `page`, `pageSize`. As exportações preservam os filtros e ignoram paginação. O relatório HTML inclui resumo, vendas por canal e movimentações; use “Imprimir / Salvar em PDF” e escolha “Salvar como PDF” no navegador.
 
 ## Configuração e categorias
 

@@ -7,7 +7,7 @@ Avaliação Integrativa UNIPLAC. API em C# com ASP.NET Core, Entity Framework Co
 - Registro de vendas individuais ou consolidadas, descontos e taxas por canal e pagamento.
 - Contas a receber e a pagar, confirmação de recebimentos/pagamentos e estornos com histórico.
 - Aportes e retiradas pessoais separados das receitas e despesas do negócio.
-- Painel de caixa e resultado operacional estimado, filtros, resumo diário e exportação CSV.
+- Painel de caixa e resultado operacional estimado, filtros, resumo diário e exportações CSV e relatório colorido para PDF.
 - Cadastro de ingredientes e receitas, custo proporcional e precificação por margem.
 - API REST documentada em OpenAPI e telas provisórias para testar os fluxos.
 
@@ -99,7 +99,7 @@ docs/           Modelo relacional e guia para o front-end
 3. Confirme o recebimento integral quando o dinheiro entrar. Informe a taxa efetiva se diferir da estimativa.
 4. Cadastre despesas e confirme pagamentos separadamente.
 5. Registre aportes e retiradas pessoais como movimentos próprios.
-6. Consulte painel, resumo do dia e CSV. Resumo é somente leitura: não cria outro lançamento.
+6. Consulte painel, resumo do dia e exporte CSV ou relatório colorido para imprimir/salvar como PDF. Resumo é somente leitura: não cria outro lançamento.
 7. Cadastre ingredientes e receitas e simule preços. Receitas são opcionais para vendas rápidas.
 
 ## Dinheiro e taxas

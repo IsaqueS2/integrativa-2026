@@ -1,5 +1,50 @@
 "use strict";
 window.ui = (() => {
+    const pageLoader = document.getElementById("page-loader");
+    const loaderMain = document.getElementById("conteudo");
+    const loaderStartedAt = performance.now();
+    let loaderFinished = false;
+    let loaderHideTimer;
+    const hidePageLoader = () => {
+        if (!pageLoader) return;
+        pageLoader.classList.add("is-hiding");
+        pageLoader.setAttribute("aria-hidden", "true");
+        loaderMain?.setAttribute("aria-busy", "false");
+        loaderHideTimer = setTimeout(() => {
+            pageLoader.hidden = true;
+            pageLoader.classList.remove("is-hiding");
+        }, 250);
+    };
+    const finishInitialLoad = () => {
+        if (loaderFinished) return;
+        loaderFinished = true;
+        clearTimeout(loaderHideTimer);
+        const remaining = Math.max(0, 550 - (performance.now() - loaderStartedAt));
+        loaderHideTimer = setTimeout(hidePageLoader, remaining);
+    };
+    const showPageLoader = () => {
+        if (!pageLoader) return;
+        clearTimeout(loaderHideTimer);
+        pageLoader.hidden = false;
+        pageLoader.classList.remove("is-hiding");
+        pageLoader.setAttribute("aria-hidden", "false");
+        loaderMain?.setAttribute("aria-busy", "true");
+    };
+    if (pageLoader) {
+        pageLoader.setAttribute("aria-hidden", "false");
+        loaderHideTimer = setTimeout(finishInitialLoad, 15000);
+        document.addEventListener("click", event => {
+            if (!(event.target instanceof Element) || event.defaultPrevented ||
+                event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            const link = event.target.closest("a[href]");
+            if (!link || link.hasAttribute("download") || link.target === "_blank" ||
+                !(link.matches("a.brand") || link.closest("header > nav"))) return;
+            const destination = new URL(link.href, location.href);
+            if (destination.origin !== location.origin ||
+                (destination.pathname === location.pathname && destination.search === location.search)) return;
+            showPageLoader();
+        });
+    }
     const moneyFormat = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
     const today = () => {
         const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
@@ -110,6 +155,36 @@ window.ui = (() => {
     document.addEventListener("blur", event => {
         if (event.target instanceof HTMLInputElement) event.target.classList.add("touched");
     }, true);
+    document.addEventListener("click", event => {
+        const link = event.target.closest("a[data-expand-target]");
+        if (!link) return;
+        const target = document.getElementById(link.dataset.expandTarget);
+        if (!(target instanceof HTMLDetailsElement)) return;
+        event.preventDefault();
+        target.open = true;
+        history.replaceState(null, "", link.getAttribute("href"));
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    const targetFromHash = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (targetFromHash instanceof HTMLDetailsElement && targetFromHash.classList.contains("page-option"))
+        targetFromHash.open = true;
+    const designToggle = document.getElementById("design-toggle");
+    const isGereDoceDesign = () => document.documentElement.classList.contains("design-gere-doce");
+    if (designToggle) {
+        const updateDesignToggle = () => {
+            const active = isGereDoceDesign();
+            designToggle.setAttribute("aria-pressed", String(active));
+            designToggle.querySelector("span").textContent = active ? "Voltar ao visual anterior" : "Usar identidade Gere Doce";
+        };
+        updateDesignToggle();
+        designToggle.addEventListener("click", () => {
+            const useGereDoceDesign = !isGereDoceDesign();
+            document.documentElement.classList.toggle("design-gere-doce", useGereDoceDesign);
+            document.documentElement.classList.toggle("design-classic", !useGereDoceDesign);
+            localStorage.setItem("confeitaria-design", useGereDoceDesign ? "gere-doce" : "classic");
+            updateDesignToggle();
+        });
+    }
     function bindAction(id, handler) {
         document.getElementById(id).addEventListener("click", async event => {
             const button = event.target.closest("button[data-action]");
@@ -165,5 +240,5 @@ window.ui = (() => {
     };
     document.querySelectorAll("header > nav a").forEach(a => { if (a.getAttribute("href").toLowerCase() === location.pathname.toLowerCase()) a.setAttribute("aria-current", "page"); });
     initializeDates();
-    return { api, notify, listenForm, query, items, loadCatalogs, catalogName, rows, money, cents, today, date, dateToInput, decimalInput, escape, label, bindAction, ask, actionDate, cancelData, initializeDates };
+    return { api, notify, listenForm, query, items, loadCatalogs, catalogName, rows, money, cents, today, date, dateToInput, decimalInput, escape, label, bindAction, ask, actionDate, cancelData, initializeDates, finishInitialLoad };
 })();

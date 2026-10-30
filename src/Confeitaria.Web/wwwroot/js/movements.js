@@ -63,4 +63,5 @@
         try { const recipes = await api("/recipes"); ui.items(recipes).forEach(recipe => document.getElementById("sale-recipe").add(new Option(recipe.name, recipe.id))); }
         catch { document.getElementById("sale-recipe").closest("label").hidden = true; document.querySelector('[name="recipeQuantity"]').closest("label").hidden = true; }
     } catch (error) { notify(error.message, true); }
+    finally { ui.finishInitialLoad(); }
 })();

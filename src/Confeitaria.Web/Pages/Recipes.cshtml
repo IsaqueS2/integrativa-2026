@@ -7,12 +7,7 @@
         <p>Monte a ficha técnica, conheça o custo por unidade e simule um preço para valorizar seu trabalho.</p>
     </div>
 </div>
-<nav class="section-index" aria-label="Etapas de receitas e preços">
-    <a href="#ingredients-section">1. Ingredientes</a>
-    <a href="#recipe-editor">2. Ficha técnica</a>
-    <a href="#saved-recipes">3. Receitas</a>
-</nav>
-<section id="ingredients-section" class="recipe-section ingredient-section">
+<details id="ingredients-option" class="page-option"><summary>Ingredientes e embalagens</summary><section id="ingredients-section" class="recipe-section ingredient-section">
     <h2>1. Cadastre seus ingredientes</h2>
     <p class="hint">Informe a quantidade e o preço da embalagem. O sistema calcula o custo proporcional usado em cada receita.</p>
     <form id="ingredient-form"><input name="id" type="hidden" /><div class="grid">
@@ -22,7 +17,7 @@
         <label>Preço da embalagem<input type="text" inputmode="decimal" class="decimal-input" name="packagePrice" placeholder="Ex.: 18,90" required /></label>
     </div><div class="actions"><button type="submit">Salvar ingrediente</button><button type="button" class="secondary" id="ingredient-new">Limpar</button></div></form>
     <div class="table-wrap spaced"><table><thead><tr><th>Ingrediente</th><th>Embalagem em unidade-base</th><th class="money">Preço</th><th>Ações</th></tr></thead><tbody id="ingredient-rows"></tbody></table></div><p id="ingredient-list-info" class="hint"></p>
-</section>
+</section></details>
 <section id="recipe-editor" class="recipe-section recipe-builder">
     <h2>2. Monte a ficha técnica</h2>
     <p class="hint">Defina o rendimento do lote, adicione os ingredientes e inclua embalagem e mão de obra para chegar a um custo mais completo.</p>
@@ -43,7 +38,7 @@
     </div><p class="hint">Perda estimada participa do cálculo de preço, sem gerar saída no caixa. Custos já incluídos nas receitas não devem ser descontados novamente como despesas operacionais.</p>
     <div class="actions"><button type="submit">Salvar receita e calcular custo</button><button type="button" class="secondary" id="recipe-new">Nova receita</button></div></form>
 </section>
-<section id="saved-recipes" class="recipe-section saved-recipes"><h2>3. Suas receitas</h2><div class="table-wrap"><table><thead><tr><th>Receita</th><th>Rendimento</th><th>Ações</th></tr></thead><tbody id="recipe-rows"></tbody></table></div><p id="recipe-list-info" class="hint"></p></section>
+<details id="saved-recipes-option" class="page-option"><summary>Receitas salvas</summary><section id="saved-recipes" class="recipe-section saved-recipes"><h2>Suas receitas</h2><div class="table-wrap"><table><thead><tr><th>Receita</th><th>Rendimento</th><th>Ações</th></tr></thead><tbody id="recipe-rows"></tbody></table></div><p id="recipe-list-info" class="hint"></p></section></details>
 <section id="cost-section" class="recipe-cost-section" hidden><h2 id="cost-title">Custo da receita</h2><div id="cost-cards" class="cards"></div><h3>Memória dos ingredientes</h3><div class="table-wrap"><table><thead><tr><th>Ingrediente</th><th>Quantidade usada</th><th>Embalagem</th><th class="money">Preço da embalagem</th><th class="money">Custo proporcional</th></tr></thead><tbody id="cost-lines"></tbody></table></div><p class="hint">O total usa os valores proporcionais antes do arredondamento. A soma das linhas exibidas pode diferir em centavos.</p>
     <h3>Simular preço por unidade</h3><form id="price-form"><input name="recipeId" type="hidden" /><div class="grid">
         <label>Margem desejada sobre a venda %<input name="margin" type="text" inputmode="decimal" class="decimal-input" value="30,00" required /><span class="hint">Percentual do preço final que deseja manter após os custos.</span></label>
@@ -52,3 +47,7 @@
     </div><p class="hint">Margem sobre o preço de venda é diferente de markup sobre o custo. Informe apenas taxas e impostos aplicáveis ao seu negócio.</p><div class="actions"><button type="submit">Calcular preço sugerido</button></div></form><output id="price-output" class="spaced" aria-live="polite"></output>
 </section>
 @section Scripts { <script src="~/js/recipes.js" asp-append-version="true"></script> }
+@section PageOptions {
+    <a href="#ingredients-option" data-expand-target="ingredients-option">Ingredientes e embalagens</a>
+    <a href="#saved-recipes-option" data-expand-target="saved-recipes-option">Receitas salvas</a>
+}

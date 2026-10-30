@@ -47,10 +47,18 @@ public static class FinanceEndpoints
         api.MapGet("/owner-movements/{id:int}", (int id, AppDbContext db) => db.CashEntries.AsNoTracking().SingleOrDefault(x => x.Id == id && (x.Kind == CashKind.Contribution || x.Kind == CashKind.Withdrawal)) is { } x ? Results.Ok(x) : Results.NotFound());
         api.MapPost("/owner-movements/{id:int}/cancel", (int id, CancelRequest r, FinanceService s) => s.CancelOwnerMovement(id, r));
         api.MapGet("/dashboard", ([AsParameters] ReportFilter f, ReportService s) => s.Dashboard(f));
+        api.MapGet("/dashboard/trends", ([AsParameters] ReportFilter f, ReportService s) => s.DashboardTrends(f));
         api.MapGet("/daily-summary", (DateOnly date, ReportService s) => s.Dashboard(new ReportFilter(date, date)));
         api.MapGet("/ledger", ([AsParameters] ReportFilter f, ReportService s, int page = 1, int pageSize = 25) => ReportService.Paginate(s.Ledger(f), page, pageSize));
         api.MapGet("/exports/ledger.csv", ([AsParameters] ReportFilter f, ReportService s) => Csv(s.LedgerCsv(f), "movimentacoes.csv"));
         api.MapGet("/exports/summary.csv", ([AsParameters] ReportFilter f, ReportService s) => Csv(s.SummaryCsv(f), "resumo.csv"));
+        api.MapGet("/exports/report.html", ([AsParameters] ReportFilter f, ReportService s) =>
+                Results.Content(s.PrintableReport(f), "text/html; charset=utf-8"))
+            .WithName("GetPrintableFinancialReport")
+            .WithSummary("Gera um relatório financeiro formatado para impressão ou PDF")
+            .WithDescription("Retorna uma página de relatório com resumo financeiro, vendas por canal e movimentações de caixa. Use a opção de impressão do navegador para salvar em PDF. Os filtros do painel são preservados.")
+            .Produces(StatusCodes.Status200OK, contentType: "text/html")
+            .Produces(StatusCodes.Status400BadRequest);
     }
     static IResult Csv(string text, string name) => Results.File(Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(text)).ToArray(), "text/csv; charset=utf-8", name);
 }

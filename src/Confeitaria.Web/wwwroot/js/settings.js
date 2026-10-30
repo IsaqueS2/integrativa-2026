@@ -45,4 +45,5 @@
         await api(`${endpoint}/${id}`, "PUT", { name: value.name, rateBasisPoints: cents(value.rate), fixedFeeCents: cents(value.fixed) }); await load(); notify("Cadastro atualizado. Vendas antigas mantêm as taxas anteriores.");
     });
     try { await load(); } catch (error) { notify(error.message, true); }
+    finally { ui.finishInitialLoad(); }
 })();

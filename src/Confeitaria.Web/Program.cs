@@ -49,7 +49,12 @@ app.UseCors();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(o => { o.RoutePrefix = "docs"; o.SwaggerEndpoint("/swagger/v1/swagger.json", "Confeitaria API v1"); });
+    app.UseSwaggerUI(o =>
+    {
+        o.RoutePrefix = "docs";
+        o.SwaggerEndpoint("/swagger/v1/swagger.json", "Confeitaria API v1");
+        o.InjectStylesheet("/css/swagger-ui.css");
+    });
 }
 app.MapFinance();
 app.MapRecipes();

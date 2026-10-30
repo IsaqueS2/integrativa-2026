@@ -1,0 +1,50 @@
+.topbar {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0dfce;
+    background: #fff8eb;
+}
+
+.topbar .topbar-wrapper {
+    align-items: center;
+}
+
+.topbar .topbar-wrapper .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar .topbar-wrapper .link svg {
+    display: none;
+}
+
+.topbar .topbar-wrapper .link::before {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    background: url("/images/gere-doce-mascot.png") center / contain no-repeat;
+    content: "";
+}
+
+.topbar .topbar-wrapper .link::after {
+    color: #81232e;
+    content: "Gere Doce · Guia da API";
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.topbar .download-url-wrapper .select-label select {
+    border-color: #efdfcf;
+}
+
+@media (max-width: 640px) {
+    .topbar .topbar-wrapper .link::before {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+    }
+
+    .topbar .topbar-wrapper .link::after {
+        font-size: 16px;
+    }
+}

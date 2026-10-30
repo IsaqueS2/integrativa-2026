@@ -1,13 +1,11 @@
 @page "/"
 @{ ViewData["Title"] = "Painel"; }
-<div class="page-heading page-heading-dashboard">
-    <div class="page-heading-copy">
-        <p class="eyebrow">Visão do negócio</p>
-        <h1>Visão geral da sua confeitaria</h1>
-        <p>Acompanhe vendas, caixa e resultado para cuidar do negócio com mais clareza.</p>
-    </div>
-    <a class="button" href="/Movements#sale-form">+ Registrar venda</a>
+<div class="dashboard-heading">
+    <p class="eyebrow">Visão do negócio</p>
+    <h1>Resumo da confeitaria</h1>
 </div>
+<details id="dashboard-filters-option" class="page-option dashboard-option">
+    <summary>Filtros e exportações</summary>
 <section class="dashboard-filters" aria-labelledby="filter-title">
     <h2 id="filter-title">Resumo do período</h2>
     <form id="dashboard-filter">
@@ -23,17 +21,37 @@
                 <label>Meio de pagamento<select name="paymentMethodId" data-catalog="paymentMethods"><option value="">Todos</option></select></label>
                 <label>Categoria<select name="categoryId" data-catalog="categories"><option value="">Todas</option></select></label>
             </div>
-            <div class="actions"><a class="button secondary" id="export-csv" href="#">Exportar movimentações CSV</a><a class="button secondary" id="export-summary" href="#">Exportar resumo CSV</a></div>
+            <div class="actions"><a class="button secondary" id="export-csv" href="#">Exportar movimentações CSV</a><a class="button secondary" id="export-summary" href="#">Exportar resumo CSV</a><a class="button secondary" id="export-pdf" href="#" target="_blank" rel="noopener">Relatório colorido · PDF</a></div>
         </details>
     </form>
 </section>
-<div class="dashboard-section-title"><h2>Indicadores principais</h2><span class="hint">Valores atualizados para o período selecionado</span></div>
+ </details>
+<div class="dashboard-section-title"><h2>Indicadores principais</h2></div>
 <div id="dashboard-primary-cards" class="cards dashboard-primary-metrics" aria-live="polite"><p class="loading">Carregando resumo…</p></div>
-<details class="secondary-metrics">
+<details id="dashboard-metrics-option" class="secondary-metrics page-option">
     <summary>Ver todos os indicadores financeiros</summary>
     <div id="dashboard-cards" class="cards" aria-live="polite"></div>
 </details>
-<section class="dashboard-notice"><h2>Avisos e atenção</h2><ul class="notices" id="dashboard-notices"><li>Carregando…</li></ul></section>
-<section class="dashboard-channel"><h2>Vendas por canal</h2><p class="hint">Compare as vendas líquidas. A margem considera os custos informados, antes das despesas operacionais gerais.</p><div id="channel-chart" class="channel-chart" role="list" aria-label="Comparação de vendas líquidas por canal"></div><div class="table-wrap"><table><thead><tr><th>Canal</th><th class="money">Vendas líquidas</th><th class="money">Margem antes de despesas</th><th>Custos informados</th></tr></thead><tbody id="channel-totals"></tbody></table></div></section>
-<section class="dashboard-ledger"><h2>Movimentações de caixa</h2><p class="hint">A data de recebimento ou pagamento é usada nesta consulta. O resumo não cria novos lançamentos.</p><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="money">Valor</th></tr></thead><tbody id="ledger-rows"></tbody></table></div><p id="ledger-count" class="hint"></p></section>
+<div class="dashboard-charts">
+    <section class="dashboard-chart-card dashboard-profit-chart">
+        <div class="dashboard-chart-heading"><div><h2>Lucro estimado</h2><p class="hint">Vendas líquidas menos custos diretos conhecidos e despesas operacionais.</p></div><strong id="profit-chart-total" class="dashboard-chart-total">—</strong></div>
+        <div id="profit-chart" class="dashboard-chart" role="img" aria-label="Gráfico de lucro estimado ao longo do período"><p class="loading">Carregando gráfico…</p></div>
+        <p id="profit-chart-note" class="hint dashboard-chart-note"></p>
+    </section>
+    <section class="dashboard-chart-card dashboard-expense-chart">
+        <div class="dashboard-chart-heading"><div><h2>Gastos registrados</h2><p class="hint">Despesas, compras de insumos e custos alocados no período.</p></div><strong id="expense-chart-total" class="dashboard-chart-total">—</strong></div>
+        <div id="expense-chart" class="dashboard-chart" role="img" aria-label="Gráfico de gastos registrados ao longo do período"><p class="loading">Carregando gráfico…</p></div>
+    </section>
+</div>
+<details id="dashboard-notices-option" class="page-option"><summary>Avisos e atenção</summary><section class="dashboard-notice"><h2>Avisos e atenção</h2><ul class="notices" id="dashboard-notices"><li>Carregando…</li></ul></section></details>
+<details id="dashboard-channel-option" class="page-option"><summary>Vendas por canal</summary><section class="dashboard-channel"><p class="hint">A margem considera os custos informados, antes das despesas operacionais gerais.</p><div class="table-wrap"><table><thead><tr><th>Canal</th><th class="money">Vendas líquidas</th><th class="money">Margem antes de despesas</th><th>Custos informados</th></tr></thead><tbody id="channel-totals"></tbody></table></div></section></details>
+<details id="dashboard-ledger-option" class="page-option"><summary>Movimentações de caixa</summary><section class="dashboard-ledger"><p class="hint">A data de recebimento ou pagamento é usada nesta consulta. O resumo não cria novos lançamentos.</p><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="money">Valor</th></tr></thead><tbody id="ledger-rows"></tbody></table></div><p id="ledger-count" class="hint"></p></section></details>
 @section Scripts { <script src="~/js/dashboard.js" asp-append-version="true"></script> }
+@section PageOptions {
+    <a href="/Movements#sale-form">Registrar uma venda</a>
+    <a href="#dashboard-filters-option" data-expand-target="dashboard-filters-option">Filtros e exportações</a>
+    <a href="#dashboard-metrics-option" data-expand-target="dashboard-metrics-option">Todos os indicadores</a>
+    <a href="#dashboard-notices-option" data-expand-target="dashboard-notices-option">Avisos e atenção</a>
+    <a href="#dashboard-channel-option" data-expand-target="dashboard-channel-option">Vendas por canal</a>
+    <a href="#dashboard-ledger-option" data-expand-target="dashboard-ledger-option">Movimentações de caixa</a>
+}

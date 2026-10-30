@@ -78,4 +78,5 @@
     document.getElementById("ingredient-new").addEventListener("click", () => { ingredientForm.reset(); ingredientForm.elements.id.value = ""; });
     document.getElementById("recipe-new").addEventListener("click", () => { recipeForm.reset(); recipeForm.elements.id.value = ""; document.getElementById("recipe-items").replaceChildren(); addItem(); });
     try { await load(); } catch (error) { notify(error.message, true); }
+    finally { ui.finishInitialLoad(); }
 })();

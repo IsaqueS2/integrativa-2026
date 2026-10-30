@@ -22,6 +22,8 @@ public record LedgerRow(DateOnly Date, string Kind, int SourceId, long SignedCen
     int? ChannelId, int? PaymentMethodId, int? CategoryId, bool IsReversal);
 public record ChannelResult(int ChannelId, string Name, long NetSalesCents, long KnownCostsCents,
     int SalesCount, int SalesWithCost, long? EstimatedMarginCents);
+public record DashboardTrendPoint(DateOnly PeriodStart, long EstimatedProfitCents, long ExpensesCents);
+public record DashboardTrendsResult(bool Monthly, IReadOnlyList<DashboardTrendPoint> Points);
 public record DashboardResult(DateOnly From, DateOnly To, long GrossSalesCents, long DiscountsCents,
     long FeesCents, long NetSalesCents, long KnownDirectCostsCents, int SalesCount, int SalesWithCost,
     long? EstimatedOperatingResultCents, long PartialOperatingResultCents, long OperatingExpensesCents,

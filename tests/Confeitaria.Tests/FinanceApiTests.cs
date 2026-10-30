@@ -18,6 +18,60 @@ public sealed class FinanceApiTests
     };
 
     [Fact]
+    public async Task Dashboard_trends_group_daily_profit_and_all_expenses()
+    {
+        using var s = await Scenario.Create();
+        await s.Sell();
+        await s.Post<Sale>("sales", new SaleRequest(SaleDay.AddDays(1), 5000, s.ChannelId, s.PaymentId, DirectCostCents: 0));
+        await s.Expense(1000, s.OperatingId);
+        await s.Expense(500, s.SuppliesId);
+
+        var trends = await s.Get<DashboardTrendsResult>("dashboard/trends?from=2026-01-01&to=2026-01-31");
+
+        Assert.False(trends.Monthly);
+        Assert.Equal(31, trends.Points.Count);
+        Assert.Equal(5800, trends.Points.Single(x => x.PeriodStart == SaleDay).EstimatedProfitCents);
+        Assert.Equal(1500, trends.Points.Single(x => x.PeriodStart == SaleDay).ExpensesCents);
+        Assert.Equal(4300, trends.Points.Single(x => x.PeriodStart == SaleDay.AddDays(1)).EstimatedProfitCents);
+    }
+
+    [Fact]
+    public async Task Dashboard_trends_switch_to_monthly_buckets_for_longer_periods()
+    {
+        using var s = await Scenario.Create();
+        await s.Sell();
+        await s.Expense(1000, s.OperatingId);
+
+        var trends = await s.Get<DashboardTrendsResult>("dashboard/trends?from=2026-01-01&to=2026-03-31");
+
+        Assert.True(trends.Monthly);
+        Assert.Equal(3, trends.Points.Count);
+        Assert.Equal(new DateOnly(2026, 1, 1), trends.Points[0].PeriodStart);
+        Assert.Equal(5800, trends.Points[0].EstimatedProfitCents);
+        Assert.Equal(1000, trends.Points[0].ExpensesCents);
+    }
+
+    [Fact]
+    public async Task Printable_report_escapes_business_name_and_contains_filtered_financial_details()
+    {
+        using var s = await Scenario.Create();
+        await s.Put<BusinessSettings>("settings", new SettingsRequest("Doce & Cia <Artesanal>", Opening, 10000, 500));
+        await s.Sell(directCost: null);
+        var response = await s.Client.GetAsync("/api/v1/exports/report.html?from=2026-01-01&to=2026-01-31");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
+        Assert.Contains("Doce &amp; Cia &lt;Artesanal&gt;", html);
+        Assert.Contains("Imprimir / Salvar em PDF", html);
+        Assert.Contains("Vendas líquidas", html);
+        Assert.Contains("Resultado parcial", html);
+        Assert.Contains("Vendas por canal", html);
+        Assert.Contains("Movimentações de caixa", html);
+        Assert.Contains("R$ 88,00", html);
+    }
+
+    [Fact]
     public async Task Discount_then_combined_fees_are_calculated_on_server_and_not_paid_until_received()
     {
         using var s = await Scenario.Create();
