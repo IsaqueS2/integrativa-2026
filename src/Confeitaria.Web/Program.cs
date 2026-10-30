@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json.Serialization;
 using Confeitaria.Web.Api;
 using Confeitaria.Web.Data;
@@ -28,8 +27,6 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 var app = builder.Build();
 app.Use(async (context, next) =>
 {
-    if (context.Connection.RemoteIpAddress is { } ip && !IPAddress.IsLoopback(ip))
-    { context.Response.StatusCode = 403; await context.Response.WriteAsync("Protótipo local: acesso apenas por loopback."); return; }
     try { await next(context); }
     catch (DomainException ex) { await Problem(ex.StatusCode, ex.Message); }
     catch (DbUpdateException ex) when (ex.InnerException is SqliteException { SqliteErrorCode: 19 })

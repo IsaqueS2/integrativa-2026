@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: confeitaria
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: AllowedHosts
+        value: "*"
+      - key: ConnectionStrings__Database
+        value: "Data Source=/tmp/confeitaria.db;Foreign Keys=True;Default Timeout=30"
+      - key: SeedDemo
+        value: "true"

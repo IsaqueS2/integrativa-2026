@@ -47,6 +47,20 @@ dotnet run --project src/Confeitaria.Web --launch-profile local -- --seed-demo
 - API interativa: **http://127.0.0.1:5080/docs**, somente em Development.
 - OpenAPI: `/swagger/v1/swagger.json`. Saúde: `/health`.
 
+## Publicar no Render
+
+O repositório inclui um `Dockerfile` e um Blueprint em `render.yaml` para publicar a aplicação como serviço Web gratuito:
+
+1. Envie o repositório para o GitHub.
+2. No Render, escolha **New → Blueprint** e conecte o repositório.
+3. Confirme a criação do serviço `confeitaria`. O Render compila a imagem, aplica as migrações na inicialização e fornece um endereço `*.onrender.com`.
+
+O serviço usa o SQLite em `/tmp/confeitaria.db` e inicia com dados fictícios (`SeedDemo=true`). No plano gratuito, o disco é efêmero: registros podem ser perdidos ao reiniciar ou publicar uma nova versão. Use apenas para demonstração; para persistência, configure armazenamento persistente compatível com o plano do Render e aponte `ConnectionStrings__Database` para esse volume.
+
+**Atenção:** a aplicação não tem autenticação nem separação de usuários. Qualquer pessoa com o endereço pode consultar e alterar os dados. Não use dados financeiros reais nem exponha informações pessoais. Um deploy público para uso real exige autenticação e autorização antes de ser considerado seguro.
+
+Para um front-end hospedado em outro domínio, adicione a origem exata em `AllowedOrigins__0` nas variáveis de ambiente do serviço Render.
+
 | Tela | Caminho |
 |---|---|
 | Painel financeiro | `/` |
@@ -171,7 +185,7 @@ Consulte [o guia do front-end](docs/FRONTEND.md) e [o diagrama do banco](docs/DA
 
 ## Limitações e evolução
 
-Uma confeitaria local, sem autenticação ou múltiplos usuários. O servidor aceita somente clientes de loopback. **Não publique esta configuração:** autenticação, autorização, isolamento por empresa e proteção dos dados reais precisam ser implementados antes de hospedagem.
+Uma confeitaria, sem autenticação ou múltiplos usuários. O deploy Render incluído é público e voltado somente a demonstrações com dados fictícios. **Não publique dados reais:** autenticação, autorização, isolamento por empresa e proteção dos dados precisam ser implementados antes de uso real.
 
 Um recebimento integral por venda e um pagamento integral por despesa. Sem estoque físico, lotes, validade, produção, integração externa, nota fiscal, cobrança automática ou IA. Lançamentos financeiros são corrigidos por cancelamento/estorno e novo registro, não por exclusão definitiva. Listas de ingredientes/receitas têm paginação; as telas provisórias usam até os primeiros 100 cadastros.
 
