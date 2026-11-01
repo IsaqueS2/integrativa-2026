@@ -63,10 +63,10 @@
 <details id="dashboard-ledger-option" class="page-option"><summary>Movimentações de caixa</summary><section class="dashboard-ledger"><p class="hint">A data de recebimento ou pagamento é usada nesta consulta. O resumo não cria novos lançamentos.</p><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="money">Valor</th></tr></thead><tbody id="ledger-rows"></tbody></table></div><p id="ledger-count" class="hint"></p></section></details>
 @section Scripts { <script src="~/js/dashboard.js" asp-append-version="true"></script> }
 @section PageOptions {
+    <button id="dashboard-version-toggle" class="secondary nav-option-action" type="button" aria-pressed="false">Usar painel anterior</button>
     <a href="#dashboard-filters-option" data-expand-target="dashboard-filters-option">Filtros e exportações</a>
     <a href="#dashboard-metrics-option" data-expand-target="dashboard-metrics-option">Todos os indicadores</a>
     <a href="#dashboard-notices-option" data-expand-target="dashboard-notices-option">Avisos e atenção</a>
     <a href="#dashboard-channel-option" data-expand-target="dashboard-channel-option">Vendas por canal</a>
     <a href="#dashboard-ledger-option" data-expand-target="dashboard-ledger-option">Movimentações de caixa</a>
-    <button id="dashboard-version-toggle" class="nav-option-action" type="button" aria-pressed="false">Usar painel anterior</button>
 }
