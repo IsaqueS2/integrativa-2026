@@ -180,13 +180,52 @@ window.ui = (() => {
         document.querySelectorAll("input[data-today]").forEach(input => input.value = dateToInput(today()));
         document.querySelectorAll("input[data-date-br]").forEach(input => input.title = "Informe a data no formato dia/mês/ano.");
         document.querySelectorAll("input.decimal-input").forEach(input => {
-            input.pattern = "-?(?:[0-9]+|[0-9]{1,3}(?:\\.[0-9]{3})+)(?:,[0-9]{1,2}|[.][0-9]{1,2})?";
+            input.pattern = "(?:[0-9]+|[0-9]{1,3}(?:\\.[0-9]{3})+)(?:,[0-9]{1,2}|[.][0-9]{1,2})?";
             input.title = "Informe um valor com até duas casas decimais. Exemplo: 1.234,56.";
         });
     }
+    const decimalDraft = /^(?:[0-9]+|[0-9]{0,3}(?:\.[0-9]{0,3})*)(?:,[0-9]{0,2}|[.][0-9]{0,2})?$/;
+    const selectDefaultZero = event => {
+        const input = event.target;
+        if (input instanceof HTMLInputElement && input.classList.contains("decimal-input") &&
+            /^0+(?:,0{1,2}|\.0{1,2})?$/.test(input.value))
+            input.select();
+    };
+    document.addEventListener("focusin", selectDefaultZero);
+    document.addEventListener("click", selectDefaultZero);
+    document.addEventListener("beforeinput", event => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement) || !input.classList.contains("decimal-input") ||
+            !event.inputType.startsWith("insert") || event.data === null) return;
+        const start = input.selectionStart ?? input.value.length;
+        const end = input.selectionEnd ?? input.value.length;
+        const nextValue = input.value.slice(0, start) + event.data + input.value.slice(end);
+        if (!decimalDraft.test(nextValue)) event.preventDefault();
+    });
+    document.addEventListener("paste", event => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement) || !input.classList.contains("decimal-input")) return;
+        const pasted = event.clipboardData?.getData("text");
+        if (pasted === undefined) return;
+        const start = input.selectionStart ?? input.value.length;
+        const end = input.selectionEnd ?? input.value.length;
+        const nextValue = input.value.slice(0, start) + pasted + input.value.slice(end);
+        if (!decimalDraft.test(nextValue)) event.preventDefault();
+    });
+    document.addEventListener("input", event => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement) || !input.classList.contains("decimal-input")) return;
+        input.setCustomValidity(decimalDraft.test(input.value)
+            ? ""
+            : "Informe apenas números e separador decimal, com até duas casas decimais.");
+    });
     document.addEventListener("blur", event => {
         if (event.target instanceof HTMLInputElement) event.target.classList.add("touched");
     }, true);
+    document.addEventListener("reset", event => {
+        if (event.target instanceof HTMLFormElement)
+            event.target.querySelectorAll(".touched").forEach(input => input.classList.remove("touched"));
+    });
     document.addEventListener("click", event => {
         const link = event.target.closest("a[data-expand-target]");
         if (!link) return;
@@ -221,7 +260,7 @@ window.ui = (() => {
                 const isDecimal = field.type === "number";
                 const type = isDate || isDecimal ? "text" : field.type || "text";
                 const value = isDate ? dateToInput(field.value) : isDecimal ? decimalInput(field.value) : field.value ?? "";
-                const format = isDate ? 'data-date-br placeholder="dd/mm/aaaa" inputmode="numeric" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" title="Informe a data no formato dia/mês/ano."' : isDecimal ? 'inputmode="decimal" class="decimal-input" pattern="-?(?:[0-9]+|[0-9]{1,3}(?:\\.[0-9]{3})+)(?:,[0-9]{1,2}|[.][0-9]{1,2})?" title="Exemplo: 1.234,56."' : "";
+                const format = isDate ? 'data-date-br placeholder="dd/mm/aaaa" inputmode="numeric" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" title="Informe a data no formato dia/mês/ano."' : isDecimal ? 'inputmode="decimal" class="decimal-input" pattern="(?:[0-9]+|[0-9]{1,3}(?:\\.[0-9]{3})+)(?:,[0-9]{1,2}|[.][0-9]{1,2})?" title="Informe um valor com até duas casas decimais. Exemplo: 1.234,56."' : "";
                 return `<label>${escape(field.label)}<input name="${escape(field.name)}" type="${type}" value="${escape(value)}" ${field.optional ? "" : "required"} ${format} /></label>`;
             }).join("")}</div><div class="actions"><button type="submit">Confirmar</button><button type="button" class="secondary" data-close>Voltar</button></div></form>`;
             const form = dialog.querySelector("form");
