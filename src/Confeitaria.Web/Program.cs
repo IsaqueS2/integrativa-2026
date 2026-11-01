@@ -4,9 +4,25 @@ using Confeitaria.Web.Data;
 using Confeitaria.Web.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite(builder.Configuration.GetConnectionString("Database")));
+var databaseProvider = builder.Configuration["Database:Provider"] ?? "Sqlite";
+var connectionString = builder.Configuration.GetConnectionString("Database")
+    ?? throw new InvalidOperationException("ConnectionStrings:Database must be configured.");
+if (string.Equals(databaseProvider, "Postgres", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddDbContext<AppDbContext, PostgresAppDbContext>(o => o.UseNpgsql(connectionString));
+}
+else if (string.Equals(databaseProvider, "Sqlite", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite(connectionString));
+}
+else
+{
+    throw new InvalidOperationException($"Unsupported database provider '{databaseProvider}'. Use Sqlite or Postgres.");
+}
 builder.Services.AddScoped<FinanceService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<RecipeService>();
@@ -34,6 +50,11 @@ app.Use(async (context, next) =>
     catch (DbUpdateException ex) when (ex.InnerException is SqliteException { SqliteErrorCode: 19 })
     { await Problem(409, "Registro duplicado ou relacionamento inválido. Confira nomes e referências."); }
     catch (SqliteException ex) when (ex.SqliteErrorCode is 5 or 6)
+    { await Problem(409, "Banco ocupado. Repita a operação com os mesmos dados."); }
+    catch (DbUpdateException ex) when (ex.InnerException is PostgresException
+        { SqlState: PostgresErrorCodes.UniqueViolation or PostgresErrorCodes.ForeignKeyViolation or PostgresErrorCodes.CheckViolation or PostgresErrorCodes.NotNullViolation })
+    { await Problem(409, "Registro duplicado ou relacionamento inválido. Confira nomes e referências."); }
+    catch (PostgresException ex) when (ex.SqlState is PostgresErrorCodes.DeadlockDetected or PostgresErrorCodes.SerializationFailure)
     { await Problem(409, "Banco ocupado. Repita a operação com os mesmos dados."); }
     catch (OverflowException) { await Problem(400, "Os valores excedem o limite numérico permitido."); }
     catch (BadHttpRequestException ex) { await Problem(400, "Requisição inválida: " + ex.Message); }

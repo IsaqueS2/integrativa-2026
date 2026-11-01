@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Confeitaria.Web.Data;
 
-public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public partial class AppDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<BusinessSettings> Settings => Set<BusinessSettings>();
     public DbSet<Category> Categories => Set<Category>();
