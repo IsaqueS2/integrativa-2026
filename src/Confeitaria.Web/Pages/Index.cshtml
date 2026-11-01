@@ -1,13 +1,20 @@
 @page "/"
 @{ ViewData["Title"] = "Painel"; }
 <div class="dashboard-heading">
-    <p class="eyebrow">Visão do negócio</p>
-    <h1>Resumo da confeitaria</h1>
+    <div>
+        <p class="eyebrow">Visão do negócio</p>
+        <h1>Resumo da confeitaria</h1>
+        <p id="dashboard-period" class="dashboard-period" aria-live="polite">Carregando período…</p>
+    </div>
+    <div class="dashboard-quick-actions" aria-label="Ações rápidas">
+        <a class="button" href="/Movements#sale-section">Registrar venda</a>
+        <a class="button secondary" href="/Movements#expense-option">Registrar despesa</a>
+    </div>
 </div>
-<details id="dashboard-filters-option" class="page-option dashboard-option">
+<details id="dashboard-filters-option" class="page-option dashboard-option dashboard-filter-option" open>
     <summary>Filtros e exportações</summary>
 <section class="dashboard-filters" aria-labelledby="filter-title">
-    <h2 id="filter-title">Resumo do período</h2>
+    <h2 id="filter-title">Filtrar resumo</h2>
     <form id="dashboard-filter">
         <div class="grid filters dashboard-basic-filters">
             <label>De<input type="text" name="from" data-date-br inputmode="numeric" placeholder="dd/mm/aaaa" pattern="[0-3][0-9]/[01][0-9]/[0-9]{4}" required /></label>
@@ -25,33 +32,41 @@
         </details>
     </form>
 </section>
- </details>
+</details>
 <div class="dashboard-section-title"><h2>Indicadores principais</h2></div>
 <div id="dashboard-primary-cards" class="cards dashboard-primary-metrics" aria-live="polite"><p class="loading">Carregando resumo…</p></div>
-<details id="dashboard-metrics-option" class="secondary-metrics page-option">
-    <summary>Ver todos os indicadores financeiros</summary>
-    <div id="dashboard-cards" class="cards" aria-live="polite"></div>
-</details>
 <div class="dashboard-charts">
     <section class="dashboard-chart-card dashboard-profit-chart">
         <div class="dashboard-chart-heading"><div><h2>Lucro estimado</h2><p class="hint">Vendas líquidas menos custos diretos conhecidos e despesas operacionais.</p></div><strong id="profit-chart-total" class="dashboard-chart-total">—</strong></div>
         <div id="profit-chart" class="dashboard-chart" role="img" aria-label="Gráfico de lucro estimado ao longo do período"><p class="loading">Carregando gráfico…</p></div>
         <p id="profit-chart-note" class="hint dashboard-chart-note"></p>
+        <p id="profit-chart-comparison" class="hint dashboard-comparison"></p>
     </section>
     <section class="dashboard-chart-card dashboard-expense-chart">
         <div class="dashboard-chart-heading"><div><h2>Gastos registrados</h2><p class="hint">Despesas, compras de insumos e custos alocados no período.</p></div><strong id="expense-chart-total" class="dashboard-chart-total">—</strong></div>
         <div id="expense-chart" class="dashboard-chart" role="img" aria-label="Gráfico de gastos registrados ao longo do período"><p class="loading">Carregando gráfico…</p></div>
+        <p id="expense-chart-comparison" class="hint dashboard-comparison"></p>
     </section>
 </div>
-<details id="dashboard-notices-option" class="page-option"><summary>Avisos e atenção</summary><section class="dashboard-notice"><h2>Avisos e atenção</h2><ul class="notices" id="dashboard-notices"><li>Carregando…</li></ul></section></details>
+<details id="dashboard-notices-option" class="page-option dashboard-option dashboard-alert-option" open>
+    <summary>Pontos de atenção</summary>
+    <section id="dashboard-alerts" class="dashboard-notice" aria-labelledby="dashboard-alert-title" aria-live="polite">
+        <h2 id="dashboard-alert-title">Pontos de atenção</h2>
+        <ul class="notices" id="dashboard-notices"></ul>
+    </section>
+</details>
+<details id="dashboard-metrics-option" class="secondary-metrics page-option">
+    <summary>Ver todos os indicadores financeiros</summary>
+    <div id="dashboard-cards" class="cards" aria-live="polite"></div>
+</details>
 <details id="dashboard-channel-option" class="page-option"><summary>Vendas por canal</summary><section class="dashboard-channel"><p class="hint">A margem considera os custos informados, antes das despesas operacionais gerais.</p><div class="table-wrap"><table><thead><tr><th>Canal</th><th class="money">Vendas líquidas</th><th class="money">Margem antes de despesas</th><th>Custos informados</th></tr></thead><tbody id="channel-totals"></tbody></table></div></section></details>
 <details id="dashboard-ledger-option" class="page-option"><summary>Movimentações de caixa</summary><section class="dashboard-ledger"><p class="hint">A data de recebimento ou pagamento é usada nesta consulta. O resumo não cria novos lançamentos.</p><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="money">Valor</th></tr></thead><tbody id="ledger-rows"></tbody></table></div><p id="ledger-count" class="hint"></p></section></details>
 @section Scripts { <script src="~/js/dashboard.js" asp-append-version="true"></script> }
 @section PageOptions {
-    <a href="/Movements#sale-form">Registrar uma venda</a>
     <a href="#dashboard-filters-option" data-expand-target="dashboard-filters-option">Filtros e exportações</a>
     <a href="#dashboard-metrics-option" data-expand-target="dashboard-metrics-option">Todos os indicadores</a>
     <a href="#dashboard-notices-option" data-expand-target="dashboard-notices-option">Avisos e atenção</a>
     <a href="#dashboard-channel-option" data-expand-target="dashboard-channel-option">Vendas por canal</a>
     <a href="#dashboard-ledger-option" data-expand-target="dashboard-ledger-option">Movimentações de caixa</a>
+    <button id="dashboard-version-toggle" class="nav-option-action" type="button" aria-pressed="false">Usar painel anterior</button>
 }

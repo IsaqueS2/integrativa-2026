@@ -2251,8 +2251,25 @@ button.danger {
     text-decoration: none;
 }
 
+.nav-options-links > .nav-option-action {
+    min-height: 42px;
+    justify-content: flex-start;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 450;
+    line-height: 1.35;
+    text-align: left;
+    transform: none;
+}
+
 .nav-options-links > a:hover,
-.nav-options-links > a:focus-visible {
+.nav-options-links > a:focus-visible,
+.nav-options-links > .nav-option-action:hover,
+.nav-options-links > .nav-option-action:focus-visible {
     background: var(--surface);
     color: var(--berry-dark);
 }
@@ -2733,6 +2750,38 @@ footer {
     }
 }
 
+html:not(.dashboard-previous) .dashboard-filter-option,
+html:not(.dashboard-previous) .dashboard-alert-option {
+    display: contents;
+}
+
+html:not(.dashboard-previous) .dashboard-filter-option > summary,
+html:not(.dashboard-previous) .dashboard-alert-option > summary {
+    display: none;
+}
+
+html:not(.dashboard-previous) .dashboard-filter-option > section,
+html:not(.dashboard-previous) .dashboard-alert-option > section {
+    margin-block: 0 20px;
+    border: 1px solid #efdfcf;
+    border-radius: 16px;
+    box-shadow: 0 5px 16px rgb(61 39 30 / 4%);
+}
+
+.dashboard-alert-option[hidden] {
+    display: none !important;
+}
+
+html.dashboard-previous .dashboard-quick-actions,
+html.dashboard-previous .dashboard-period,
+html.dashboard-previous .dashboard-comparison {
+    display: none;
+}
+
+html.dashboard-previous .dashboard-heading {
+    align-items: center;
+}
+
 @media (max-width: 1023px) {
     header,
     main,
@@ -3038,5 +3087,160 @@ footer {
     section,
     .panel {
         padding: 13px;
+    }
+}
+
+.dashboard-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.dashboard-period {
+    margin: 8px 0 0;
+    color: #66564d;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.dashboard-quick-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+}
+
+.dashboard-quick-actions .button {
+    min-height: 44px;
+}
+
+.dashboard-filters {
+    margin-block: 0 20px;
+}
+
+.dashboard-filters h2 {
+    margin-top: 0;
+}
+
+.dashboard-filters .dashboard-basic-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#dashboard-alerts[hidden] {
+    display: none;
+}
+
+#dashboard-alerts {
+    margin-block: 20px;
+    border-left: 4px solid #b9853e;
+    background: linear-gradient(145deg, #fffdfa, #fff8e9);
+}
+
+#dashboard-alerts h2 {
+    margin: 0 0 12px;
+    color: #68491d;
+    font-size: 17px;
+}
+
+.dashboard-alert-action {
+    display: grid;
+    gap: 3px;
+}
+
+.dashboard-alert-action a {
+    width: fit-content;
+    font-weight: 750;
+}
+
+.dashboard-alert-action span {
+    color: #57483c;
+    font-size: 13px;
+}
+
+.dashboard-comparison {
+    min-height: 18px;
+    margin: 0;
+    padding-top: 8px;
+    color: #594b43;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.dashboard-chart-grid text,
+.dashboard-chart svg text {
+    fill: #62534b;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+    outline: 3px solid #7d2532;
+    outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+    .dashboard-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .dashboard-quick-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .dashboard-filters .dashboard-basic-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .dashboard-quick-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-quick-actions .button {
+        width: 100%;
+        min-width: 0;
+        padding-inline: 9px;
+        font-size: 13px;
+    }
+
+    .dashboard-filters .dashboard-basic-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-period {
+        max-width: 42ch;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    #dashboard-alerts {
+        padding: 16px;
+    }
+
+    .dashboard-alert-action span {
+        line-height: 1.5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
     }
 }

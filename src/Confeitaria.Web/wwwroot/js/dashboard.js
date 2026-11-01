@@ -2,8 +2,33 @@
 (async () => {
     const { api, money, escape, rows, date, notify } = ui;
     const form = document.getElementById("dashboard-filter");
+    const filterOption = document.getElementById("dashboard-filters-option");
+    const noticeOption = document.getElementById("dashboard-notices-option");
+    const versionToggle = document.getElementById("dashboard-version-toggle");
+    const dashboardVersionKey = "gere-doce.dashboard-version";
+    const readPreviousVersion = () => {
+        try { return localStorage.getItem(dashboardVersionKey) === "previous"; }
+        catch { return false; }
+    };
+    const setDashboardVersion = previous => {
+        document.documentElement.classList.toggle("dashboard-previous", previous);
+        versionToggle.setAttribute("aria-pressed", String(previous));
+        versionToggle.textContent = previous ? "Voltar ao painel atualizado" : "Usar painel anterior";
+        versionToggle.title = previous
+            ? "Ativa o painel com atalhos, alertas e filtros visíveis."
+            : "Mostra o painel com filtros e avisos recolhidos.";
+        filterOption.open = !previous;
+        noticeOption.open = !previous;
+        try { localStorage.setItem(dashboardVersionKey, previous ? "previous" : "updated"); }
+        catch { /* The toggle still works for this page when browser storage is unavailable. */ }
+    };
+    setDashboardVersion(readPreviousVersion());
+    versionToggle.addEventListener("click", () => {
+        setDashboardVersion(versionToggle.getAttribute("aria-pressed") !== "true");
+    });
     form.elements.from.value = ui.dateToInput(`${ui.today().slice(0, 7)}-01`);
     form.elements.to.value = ui.dateToInput(ui.today());
+    let openingDate = null;
     function render(summary) {
         const cards = [
             ["Vendas brutas", summary.grossSalesCents], ["Descontos", summary.discountsCents],
@@ -25,12 +50,19 @@
         };
         document.getElementById("dashboard-primary-cards").innerHTML = cards.filter(([name]) => keyMetrics.has(name)).map(renderCard).join("");
         document.getElementById("dashboard-cards").innerHTML = cards.filter(([name]) => !keyMetrics.has(name)).map(renderCard).join("");
-        const hasWarnings = Boolean(summary.warnings?.length);
-        const notices = hasWarnings
-            ? summary.warnings
-            : summary.salesCount === 0 ? ["Ainda não há vendas neste período. Registre uma venda para acompanhar o desempenho da confeitaria."]
-                : ["Tudo em dia para o período consultado."];
-        document.getElementById("dashboard-notices").innerHTML = notices.map(w => `<li class="${hasWarnings ? "notice-warning" : "notice-info"}">${escape(w)}</li>`).join("");
+        const warnings = summary.warnings || [];
+        const missingCosts = summary.salesCount - summary.salesWithCost;
+        const costAction = missingCosts > 0
+            ? `<li class="dashboard-alert-action"><a href="/Movements#movement-history-option">Revisar vendas e custos</a><span>Vendas já registradas não podem ter o custo editado; se necessário, cancele e registre novamente com o custo ou a receita.</span></li>`
+            : "";
+        document.getElementById("dashboard-notices").innerHTML = [
+            ...warnings.map(warning => `<li class="notice-warning">${escape(warning)}</li>`),
+            costAction
+        ].filter(Boolean).join("");
+        const hasNotices = warnings.length > 0 || Boolean(costAction);
+        noticeOption.hidden = !hasNotices;
+        const noticeMenuLink = document.querySelector('[data-expand-target="dashboard-notices-option"]');
+        if (noticeMenuLink) noticeMenuLink.hidden = !hasNotices;
         const channels = summary.channels || [];
         rows("channel-totals", channels.map(channel => `<tr><td>${escape(channel.name)}</td><td class="money">${money(channel.netSalesCents)}</td><td class="money">${money(channel.estimatedMarginCents)}</td><td>${channel.salesWithCost}/${channel.salesCount} vendas</td></tr>`).join(""), 4, "Nenhum canal teve vendas no período selecionado.");
     }
@@ -43,7 +75,7 @@
 
         const data = values.map(value => value[field]);
         if (data.every(value => value === 0)) {
-            container.innerHTML = `<p class="chart-empty"><span aria-hidden="true">—</span><strong>Sem ${label} neste período</strong><small>Os dados aparecerão aqui quando houver movimentações.</small></p>`;
+            container.innerHTML = `<p class="chart-empty"><span aria-hidden="true">—</span><strong>Sem ${label} neste período</strong><small>Registre vendas ou despesas para preencher este gráfico.</small></p>`;
             return;
         }
 
@@ -105,32 +137,86 @@
         container.innerHTML = `<div class="dashboard-chart-scroll"><svg viewBox="0 0 ${width} ${height}" role="presentation" aria-hidden="true"><g class="dashboard-chart-grid">${horizontalGrid}</g><line class="dashboard-chart-zero" x1="${left}" y1="${zeroY.toFixed(1)}" x2="${right}" y2="${zeroY.toFixed(1)}"></line><g class="dashboard-chart-data ${field === "estimatedProfitCents" ? "profit" : "expenses"}">${chartContent}</g>${xLabels}</svg></div>`;
     }
     let trends = { monthly: false, points: [] };
-    function renderTrends(summary) {
+    function previousPeriodQuery(filter) {
+        const params = new URLSearchParams(filter);
+        const from = params.get("from");
+        const to = params.get("to");
+        if (!from || !to) return null;
+        const fromDay = Date.parse(`${from}T00:00:00Z`);
+        const toDay = Date.parse(`${to}T00:00:00Z`);
+        const dayMs = 24 * 60 * 60 * 1000;
+        const days = (toDay - fromDay) / dayMs + 1;
+        const previousTo = new Date(fromDay - dayMs).toISOString().slice(0, 10);
+        const previousFrom = new Date(fromDay - days * dayMs).toISOString().slice(0, 10);
+        if (previousFrom < openingDate) return null;
+        params.set("from", previousFrom);
+        params.set("to", previousTo);
+        return { query: params.toString(), from: previousFrom, to: previousTo };
+    }
+    function comparePeriods(current, previous) {
+        if (previous === null || previous === undefined)
+            return "Sem comparação: o período anterior é anterior à abertura.";
+        const difference = current - previous;
+        const sign = difference > 0 ? "+" : difference < 0 ? "−" : "";
+        const amount = `${sign}${money(Math.abs(difference))}`;
+        if (previous === 0) return `vs. período anterior: ${amount} (sem base anterior).`;
+        const percentage = new Intl.NumberFormat("pt-BR", {
+            maximumFractionDigits: 1,
+            signDisplay: "always"
+        }).format(difference / Math.abs(previous) * 100);
+        return `vs. período anterior: ${amount} (${percentage}%).`;
+    }
+    function renderTrends(summary, previous) {
         const points = trends.points || [];
+        const periodLabel = `${date(summary.from)} a ${date(summary.to)}`;
+        const previousPeriod = previousPeriodQuery(ui.query(form));
+        document.getElementById("dashboard-period").textContent = previousPeriod
+            ? `Período: ${periodLabel} · comparação: ${date(previousPeriod.from)} a ${date(previousPeriod.to)}`
+            : `Período: ${periodLabel} · sem período anterior para comparar`;
         document.getElementById("profit-chart-total").textContent = money(summary.partialOperatingResultCents);
         document.getElementById("expense-chart-total").textContent = money(points.reduce((sum, point) => sum + point.expensesCents, 0));
         document.getElementById("profit-chart-note").textContent = summary.salesWithCost < summary.salesCount
             ? `Resultado parcial: ${summary.salesWithCost} de ${summary.salesCount} vendas têm custo informado.`
             : "Resultado estimado após custos diretos conhecidos e despesas operacionais.";
+        document.getElementById("profit-chart-comparison").textContent = comparePeriods(
+            summary.partialOperatingResultCents,
+            previous?.partialOperatingResultCents ?? null
+        );
+        const expenses = summary.operatingExpensesCents + summary.suppliesPurchasesCents + summary.allocatedExpensesCents;
+        const previousExpenses = previous
+            ? previous.operatingExpensesCents + previous.suppliesPurchasesCents + previous.allocatedExpensesCents
+            : null;
+        document.getElementById("expense-chart-comparison").textContent = comparePeriods(expenses, previousExpenses);
         renderTrendChart("profit-chart", points, "estimatedProfitCents", "#648b73", "lucro estimado");
         renderTrendChart("expense-chart", points, "expensesCents", "#bd914e", "gastos");
     }
+    let lastChartRender = null;
     async function load() {
         const filter = ui.query(form);
-        const [summary, ledger, trendData] = await Promise.all([
+        const previousPeriod = previousPeriodQuery(filter);
+        const [summary, ledger, trendData, previous] = await Promise.all([
             api(`/dashboard?${filter}`),
             api(`/ledger?${filter}&pageSize=100`),
-            api(`/dashboard/trends?${filter}`)
+            api(`/dashboard/trends?${filter}`),
+            previousPeriod ? api(`/dashboard?${previousPeriod.query}`) : Promise.resolve(null)
         ]);
         trends = trendData;
         render(summary);
-        renderTrends(summary);
+        lastChartRender = { summary, previous };
+        renderTrends(summary, previous);
         rows("ledger-rows", ui.items(ledger).map(entry => `<tr><td>${date(entry.date)}</td><td>${escape(ui.label(entry.kind))}${entry.isReversal ? " · estorno" : ""}</td><td>${escape(entry.description || "—")}</td><td class="money ${entry.signedCents < 0 ? "negative" : "positive"}">${money(entry.signedCents)}</td></tr>`).join(""), 4, "Ainda não há movimentações de caixa neste período.");
         document.getElementById("ledger-count").textContent = `${ui.items(ledger).length} de ${ledger.total ?? ui.items(ledger).length} movimentações. O CSV inclui todos os registros do filtro.`;
         document.getElementById("export-csv").href = `/api/v1/exports/ledger.csv?${filter}`;
         document.getElementById("export-summary").href = `/api/v1/exports/summary.csv?${filter}`;
         document.getElementById("export-pdf").href = `/api/v1/exports/report.html?${filter}`;
     }
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (lastChartRender) renderTrends(lastChartRender.summary, lastChartRender.previous);
+        }, 120);
+    });
     ui.listenForm("dashboard-filter", load);
     document.getElementById("today-summary").addEventListener("click", async () => {
         try {
@@ -139,6 +225,10 @@
             await load(); notify("Resumo do dia consultado. Nenhum lançamento foi criado.");
         } catch (error) { notify(error.message, true); }
     });
-    try { await ui.loadCatalogs(); await load(); } catch (error) { notify(error.message, true); }
+    try {
+        const [, settings] = await Promise.all([ui.loadCatalogs(), api("/settings")]);
+        openingDate = settings.openingDate;
+        await load();
+    } catch (error) { notify(error.message, true); }
     finally { ui.finishInitialLoad(); }
 })();

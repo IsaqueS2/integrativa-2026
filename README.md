@@ -187,7 +187,7 @@ O preço sugerido arredonda para cima ao centavo para não reduzir a margem dese
 
 ## Integração e configuração
 
-Consulte [o guia do front-end](docs/FRONTEND.md) e [o diagrama do banco](docs/DATABASE.md). DTOs camelCase, enums como strings em inglês e erros Problem Details com `detail` em português. As telas não calculam regras financeiras nem armazenam dados em localStorage.
+Consulte [o guia do front-end](docs/FRONTEND.md) e [o diagrama do banco](docs/DATABASE.md). DTOs camelCase, enums como strings em inglês e erros Problem Details com `detail` em português. As telas não calculam regras financeiras nem armazenam dados financeiros no navegador; somente a preferência de layout do painel é lembrada localmente.
 
 `appsettings.json` é o exemplo local sem segredos. Variáveis de ambiente sobrescrevem configuração com `__`, por exemplo `ConnectionStrings__Database`, `AllowedOrigins__0` e `SeedDemo`. Não é necessário um carregador `.env`. CORS permite apenas origens configuradas; por padrão, o futuro front-end local na porta 5173.
 
