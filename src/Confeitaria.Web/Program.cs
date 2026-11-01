@@ -13,7 +13,9 @@ var connectionString = builder.Configuration.GetConnectionString("Database")
     ?? throw new InvalidOperationException("ConnectionStrings:Database must be configured.");
 if (string.Equals(databaseProvider, "Postgres", StringComparison.OrdinalIgnoreCase))
 {
-    builder.Services.AddDbContext<AppDbContext, PostgresAppDbContext>(o => o.UseNpgsql(connectionString));
+    builder.Services.AddDbContext<PostgresAppDbContext>(o =>
+        o.UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly(typeof(PostgresAppDbContext).Assembly.FullName)));
+    builder.Services.AddScoped<AppDbContext>(sp => sp.GetRequiredService<PostgresAppDbContext>());
 }
 else if (string.Equals(databaseProvider, "Sqlite", StringComparison.OrdinalIgnoreCase))
 {
@@ -84,6 +86,15 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    if (string.Equals(databaseProvider, "Postgres", StringComparison.OrdinalIgnoreCase))
+    {
+        DatabaseMigrationGuard.ValidatePostgres(db);
+        app.Logger.LogInformation(
+            "Using {ContextType} with {Provider}; PostgreSQL migrations: {Migrations}",
+            db.GetType().Name,
+            db.Database.ProviderName,
+            string.Join(", ", db.Database.GetMigrations()));
+    }
     DatabaseSeeder.Initialize(db);
     if (builder.Configuration.GetValue<bool>("SeedDemo") || args.Contains("--seed-demo"))
     {
