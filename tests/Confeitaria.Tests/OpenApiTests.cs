@@ -5,6 +5,19 @@ namespace Confeitaria.Tests;
 public class OpenApiTests
 {
     [Fact]
+    public async Task Render_hostname_is_allowed_by_default()
+    {
+        using var factory = new TestAppFactory();
+        using var client = factory.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/health");
+        request.Headers.Host = "integrativa-2026.onrender.com";
+
+        using var response = await client.SendAsync(request);
+
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Documentation_enum_contract_matches_string_values_returned_by_api()
     {
         using var factory = new TestAppFactory();

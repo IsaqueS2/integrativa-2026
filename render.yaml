@@ -10,7 +10,7 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: AllowedHosts
-        value: "*"
+        value: "*.onrender.com"
       - key: ConnectionStrings__Database
         sync: false
       - key: Database__Provider
