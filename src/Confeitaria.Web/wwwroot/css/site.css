@@ -2084,6 +2084,14 @@ button.danger {
     stroke-width: 2;
 }
 
+.dashboard-chart-data.profit rect {
+    fill: #668464;
+}
+
+.dashboard-chart-data.profit rect:hover {
+    fill: #497663;
+}
+
 .dashboard-chart-data.expenses rect {
     fill: #c3944d;
 }

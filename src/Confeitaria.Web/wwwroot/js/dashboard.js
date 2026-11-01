@@ -124,6 +124,13 @@
         }).join("");
         const chartContent = field === "estimatedProfitCents"
             ? (() => {
+                if (points.length === 1) {
+                    const point = points[0];
+                    const y = Math.min(point.y, zeroY);
+                    const barHeight = Math.max(3, Math.abs(zeroY - point.y));
+                    const singlePointBarWidth = Math.max(10, Math.min(24, slot * .62));
+                    return `<g><title>${escape(dateLabel(point.value))}: ${label} ${money(point.value[field])}</title><rect x="${(point.x - singlePointBarWidth / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${singlePointBarWidth.toFixed(1)}" height="${barHeight.toFixed(1)}" rx="4"></rect></g>`;
+                }
                 const line = points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
                 const area = `${line} L${points[points.length - 1].x.toFixed(1)},${zeroY.toFixed(1)} L${points[0].x.toFixed(1)},${zeroY.toFixed(1)} Z`;
                 const markers = points.filter(point => point.value[field] !== 0).map(point => `<g><title>${escape(dateLabel(point.value))}: ${label} ${money(point.value[field])}</title><circle cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="4"></circle></g>`).join("");
