@@ -18,7 +18,7 @@ Avaliação Integrativa UNIPLAC. API em C# com ASP.NET Core, Entity Framework Co
 |---|---|
 | Linguagem e plataforma | C# e .NET 10 LTS |
 | Back-end | ASP.NET Core Web API |
-| Banco de dados | SQLite com Entity Framework Core e migrações |
+| Banco de dados | SQLite local/testes e PostgreSQL (Supabase) em produção, com Entity Framework Core |
 | Telas de demonstração | Razor Pages, HTML, CSS e JavaScript |
 | Testes | xUnit e WebApplicationFactory com SQLite real |
 | Documentação da API | OpenAPI e Swagger UI |
@@ -56,7 +56,9 @@ O repositório inclui um `Dockerfile` e um Blueprint em `render.yaml` para publi
 2. No Render, escolha **New → Blueprint** e conecte o repositório.
 3. Confirme a criação do serviço `confeitaria`. O Render compila a imagem, aplica as migrações na inicialização e fornece um endereço `*.onrender.com`.
 
-O serviço usa o SQLite em `/tmp/confeitaria.db` e inicia com dados fictícios (`SeedDemo=true`). No plano gratuito, o disco é efêmero: registros podem ser perdidos ao reiniciar ou publicar uma nova versão. Use apenas para demonstração; para persistência, configure armazenamento persistente compatível com o plano do Render e aponte `ConnectionStrings__Database` para esse volume.
+O Blueprint configura PostgreSQL e deixa `ConnectionStrings__Database` para preenchimento seguro no painel do Render. Crie ou selecione o projeto Supabase e copie os dados em **Connect**. Configure a string no formato Npgsql (`Host=...;Port=...;Database=postgres;Username=...;Password=...;SSL Mode=Require;Maximum Pool Size=10`), sem incluí-la no repositório. Use a conexão direta se o serviço Render alcançar o endpoint; em uma rede somente IPv4, use o **Session pooler** do Supabase. Não use o **Transaction pooler** para esta API. As migrações EF Core são aplicadas pela aplicação na inicialização; o banco Supabase atualmente vazio receberá o esquema inicial. `SeedDemo=false` mantém a API sem lançamentos fictícios.
+
+Depois de salvar a variável no painel do Render, o deploy pode iniciar a API e aplicar as migrações. O plano gratuito do Render pode suspender o serviço, mas os dados permanecem no PostgreSQL do Supabase. Não há migração automática dos dados de um arquivo SQLite local para o Supabase; exporte/import dados separadamente se precisar preservá-los.
 
 **Atenção:** a aplicação não tem autenticação nem separação de usuários. Qualquer pessoa com o endereço pode consultar e alterar os dados. Não use dados financeiros reais nem exponha informações pessoais. Um deploy público para uso real exige autenticação e autorização antes de ser considerado seguro.
 
@@ -69,11 +71,11 @@ Para um front-end hospedado em outro domínio, adicione a origem exata em `Allow
 | Negócio, categorias, canais e taxas | `/Settings` |
 | Ingredientes, receitas e preços | `/Recipes` |
 
-O banco persistente fica em `src/Confeitaria.Web/confeitaria.db`. Reiniciar não apaga registros. As migrações também são aplicadas no início da aplicação. Encerre com `Ctrl+C`.
+Em desenvolvimento, o banco SQLite local fica em `src/Confeitaria.Web/confeitaria.db`. As migrações também são aplicadas no início da aplicação. Encerre com `Ctrl+C`.
 
 Sem `--seed-demo`, somente configurações e cadastros básicos são criados. Com o argumento, o seed cria lançamentos fictícios apenas se o banco ainda não tiver lançamentos, além de uma receita demonstrativa que não é duplicada. O seed não limpa bancos existentes. **Taxas demonstrativas são fictícias e editáveis; não são preços dos marketplaces.**
 
-Para um banco demonstrativo separado, sem apagar o atual:
+Para um banco SQLite demonstrativo separado, sem apagar o atual:
 
 ```powershell
 $env:ConnectionStrings__Database = 'Data Source=outra-demonstracao.db;Foreign Keys=True;Default Timeout=30'
@@ -189,7 +191,7 @@ O preço sugerido arredonda para cima ao centavo para não reduzir a margem dese
 
 Consulte [o guia do front-end](docs/FRONTEND.md) e [o diagrama do banco](docs/DATABASE.md). DTOs camelCase, enums como strings em inglês e erros Problem Details com `detail` em português. As telas não calculam regras financeiras nem armazenam dados financeiros no navegador; somente a preferência de layout do painel é lembrada localmente.
 
-`appsettings.json` é o exemplo local sem segredos. Variáveis de ambiente sobrescrevem configuração com `__`, por exemplo `ConnectionStrings__Database`, `AllowedOrigins__0` e `SeedDemo`. Não é necessário um carregador `.env`. CORS permite apenas origens configuradas; por padrão, o futuro front-end local na porta 5173.
+`appsettings.json` configura SQLite local sem segredos. `Database:Provider` aceita `Sqlite` ou `Postgres`; variáveis de ambiente usam `__`, por exemplo `Database__Provider=Postgres`, `ConnectionStrings__Database`, `AllowedOrigins__0` e `SeedDemo`. Não é necessário um carregador `.env`. CORS permite apenas origens configuradas; por padrão, o futuro front-end local na porta 5173.
 
 ## Limitações e evolução
 
@@ -199,4 +201,4 @@ Um recebimento integral por venda e um pagamento integral por despesa. Sem estoq
 
 Relatórios calculam eventos de um único negócio em memória, adequados ao protótipo. Para grandes volumes, mover agregações e paginação para SQL e medir índices. Limite de cada valor monetário de entrada: 1.000.000.000.000 centavos.
 
-Evoluções futuras: clientes, orçamentos, pedidos, sinais e pagamentos parciais, agenda e PDF. Orçamento aprovado não representa dinheiro recebido. Migrar para PostgreSQL exige trocar provedor, revisar migrações e concorrência e testar preservação dos valores/datas. Não há suporte simultâneo a dois bancos.
+Evoluções futuras: clientes, orçamentos, pedidos, sinais e pagamentos parciais, agenda e PDF. Orçamento aprovado não representa dinheiro recebido. SQLite e PostgreSQL têm conjuntos de migrações EF separados; o contexto Postgres aplica as migrações próprias sem alterar as do SQLite. Não há transferência automática de dados entre bancos.
