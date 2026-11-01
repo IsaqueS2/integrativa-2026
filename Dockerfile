@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.103-bookworm-slim AS ocr-native
+FROM mcr.microsoft.com/dotnet/sdk:10.0.103-noble AS ocr-native
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates git cmake build-essential libtesseract-dev libc6-dev libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -10,7 +10,7 @@ RUN git clone --depth 1 --branch 1.85.0 https://github.com/DanBloomberg/leptonic
     && mkdir -p /native/lib \
     && cp -a /usr/local/lib/liblept* /native/lib/
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.103-bookworm-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.103-noble AS build
 WORKDIR /src
 
 COPY global.json ./
@@ -23,7 +23,7 @@ RUN dotnet publish src/Confeitaria.Web/Confeitaria.Web.csproj \
     --no-restore \
     --output /app/publish
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.3-bookworm-slim AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.3-noble AS runtime
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libtesseract-dev libc6-dev libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
