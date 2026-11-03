@@ -1059,6 +1059,13 @@ input.decimal-input {
     font-variant-numeric: tabular-nums;
 }
 
+@media (max-width: 760px) {
+    input[data-date-br],
+    input.decimal-input {
+        font-size: 16px;
+    }
+}
+
 input::placeholder {
     color: #8a7e76;
     opacity: 1;

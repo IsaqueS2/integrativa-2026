@@ -250,8 +250,29 @@ public class ReportService(AppDbContext db)
                     .empty{padding:18px;color:#806c61;text-align:center}
                     .foot{display:flex;justify-content:space-between;gap:18px;margin-top:28px;padding-top:14px;border-top:1px solid #efdfcf;color:#806c61;font-size:10px}
                     @page{size:A4;margin:13mm}
-                    @media print{ :root,body{background:#fff!important}body{padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.toolbar{display:none}.sheet{max-width:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none}.masthead{break-inside:avoid}.metric{break-inside:avoid}h2{break-after:avoid}thead{display:table-header-group}tr{break-inside:avoid}table{break-inside:auto}.foot{break-inside:avoid}}
-                    @media(max-width:640px){body{padding:14px 8px}.sheet{padding:24px 18px}.masthead{flex-direction:column}h1{font-size:27px}.period{text-align:left}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric{padding:12px}.metric strong{font-size:16px}.table-wrap{overflow-x:auto}table{min-width:570px}}
+                    .masthead>div,.metric{min-width:0;overflow-wrap:anywhere}
+                    @media screen and (max-width:640px){
+                        body{padding:14px 8px}.sheet{padding:24px 14px}.masthead{flex-direction:column;gap:12px}
+                        h1{font-size:27px}.period{text-align:left}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+                        .metric{padding:12px}.metric strong{font-size:16px}
+                        th,td{padding:8px 5px;font-size:11px}.foot{flex-wrap:wrap;gap:6px}
+                    }
+                    @media screen and (max-width:640px), print{
+                        table{table-layout:fixed;min-width:0}
+                        th,td,.amount{overflow-wrap:anywhere;white-space:normal}
+                        table:last-of-type th:nth-child(3){width:37%}
+                    }
+                    @media print{
+                        :root,body{background:#fff!important}
+                        body{padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+                        .toolbar{display:none}
+                        .sheet{width:100%;max-width:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none}
+                        .masthead,.metrics,.foot{break-inside:avoid;page-break-inside:avoid}
+                        h2{break-after:avoid;page-break-after:avoid}
+                        thead{display:table-header-group}
+                        tr{break-inside:avoid;page-break-inside:avoid}
+                        table{break-inside:auto}
+                    }
                 </style>
             </head>
             <body>
