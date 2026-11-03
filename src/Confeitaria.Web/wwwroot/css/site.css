@@ -3259,3 +3259,77 @@ summary:focus-visible {
         transition-duration: .01ms !important;
     }
 }
+
+.dashboard-filter-option > .dashboard-filters {
+    padding: 14px 16px;
+}
+
+.dashboard-filters h2 {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+.dashboard-filters form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 12px;
+}
+
+.dashboard-filters .dashboard-basic-filters {
+    gap: 10px;
+}
+
+.dashboard-filters .dashboard-basic-filters label {
+    gap: 4px;
+}
+
+.dashboard-filters .dashboard-basic-filters input,
+.dashboard-filters .dashboard-basic-filters select {
+    min-height: 40px;
+    padding-block: 7px;
+}
+
+.dashboard-filters .actions {
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0;
+}
+
+.dashboard-filters .actions > button {
+    min-height: 44px;
+    padding: 8px 12px;
+    white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+    .dashboard-filters form {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 520px) {
+    .dashboard-filter-option > .dashboard-filters {
+        padding: 12px;
+    }
+
+    .dashboard-filters .dashboard-basic-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-filters .dashboard-basic-filters label:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .dashboard-filters .actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-filters .actions > button {
+        min-height: 44px;
+        padding-inline: 8px;
+        white-space: normal;
+    }
+}
