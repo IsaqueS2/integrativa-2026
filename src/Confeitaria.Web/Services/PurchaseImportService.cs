@@ -17,6 +17,7 @@ using TesseractOCR.Exceptions;
 using PixImage = TesseractOCR.Pix.Image;
 using PdfDocument = UglyToad.PdfPig.PdfDocument;
 using UglyToad.PdfPig.Core;
+using UglyToad.PdfPig.DocumentLayoutAnalysis.TextExtractor;
 using UglyToad.PdfPig.Rendering.Skia;
 using SkiaSharp;
 
@@ -237,7 +238,8 @@ public sealed class PurchaseImportService(AppDbContext db, FinanceService financ
         using var stream = new MemoryStream(bytes, writable: false);
         using var document = PdfDocument.Open(stream, SkiaRenderingParsingOptions.Instance);
         Rules.Require(document.NumberOfPages is > 0 and <= MaxPdfPages, "O PDF deve ter entre 1 e 20 páginas.");
-        var text = string.Join(Environment.NewLine, document.GetPages().Select(x => x.Text));
+        var text = string.Join(Environment.NewLine,
+            document.GetPages().Select(page => ContentOrderTextExtractor.GetText(page)));
         var format = "PDF com texto";
         if (string.IsNullOrWhiteSpace(text))
         {
