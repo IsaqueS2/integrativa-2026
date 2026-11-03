@@ -52,8 +52,11 @@ public static class FinanceEndpoints
         api.MapGet("/ledger", ([AsParameters] ReportFilter f, ReportService s, int page = 1, int pageSize = 25) => ReportService.Paginate(s.Ledger(f), page, pageSize));
         api.MapGet("/exports/ledger.csv", ([AsParameters] ReportFilter f, ReportService s) => Csv(s.LedgerCsv(f), "movimentacoes.csv"));
         api.MapGet("/exports/summary.csv", ([AsParameters] ReportFilter f, ReportService s) => Csv(s.SummaryCsv(f), "resumo.csv"));
-        api.MapGet("/exports/report.html", ([AsParameters] ReportFilter f, ReportService s) =>
-                Results.Content(s.PrintableReport(f), "text/html; charset=utf-8"))
+        api.MapGet("/exports/report.html", ([AsParameters] ReportFilter f, ReportService s, HttpResponse response) =>
+            {
+                response.Headers.CacheControl = "no-store";
+                return Results.Content(s.PrintableReport(f), "text/html; charset=utf-8");
+            })
             .WithName("GetPrintableFinancialReport")
             .WithSummary("Gera um relatório financeiro formatado para impressão ou PDF")
             .WithDescription("Retorna uma página de relatório com resumo financeiro, vendas por canal e movimentações de caixa. Use a opção de impressão do navegador para salvar em PDF. Os filtros do painel são preservados.")

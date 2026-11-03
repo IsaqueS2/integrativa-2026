@@ -62,6 +62,7 @@ public sealed class FinanceApiTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
+        Assert.True(response.Headers.CacheControl?.NoStore);
         Assert.Contains("Doce &amp; Cia &lt;Artesanal&gt;", html);
         Assert.Contains("Imprimir / Salvar em PDF", html);
         Assert.Contains("Vendas líquidas", html);
@@ -69,6 +70,22 @@ public sealed class FinanceApiTests
         Assert.Contains("Vendas por canal", html);
         Assert.Contains("Movimentações de caixa", html);
         Assert.Contains("R$ 88,00", html);
+    }
+
+    [Fact]
+    public async Task Printable_report_preserves_long_movement_text_and_filters_without_executing_html()
+    {
+        using var s = await Scenario.Create();
+        var description = new string('X', 180) + " <script>alert(1)</script> & teste";
+        await s.Post<CashEntry>("owner-movements", new OwnerMovementRequest(SaleDay, CashKind.Contribution, 123456789, description));
+        var html = await s.Client.GetStringAsync("/api/v1/exports/report.html?from=2026-01-10&to=2026-01-10");
+        Assert.Contains(System.Text.Encodings.Web.HtmlEncoder.Default.Encode(description), html);
+        Assert.DoesNotContain("<script>", html);
+        Assert.Contains("R$ 1.234.567,89", html);
+
+        var empty = await s.Client.GetStringAsync("/api/v1/exports/report.html?from=2026-01-11&to=2026-01-11");
+        Assert.DoesNotContain(System.Text.Encodings.Web.HtmlEncoder.Default.Encode(description), empty);
+        Assert.Contains("Nenhuma movimentação de caixa neste período.", empty);
     }
 
     [Fact]

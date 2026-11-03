@@ -99,7 +99,18 @@ dotnet test
 
 Os testes usam SQLite real, migrações reais e bancos temporários independentes. Cobrem cálculo de taxas, concorrência/idempotência, estornos, caixa histórico, filtros, custos ausentes, precificação e preservação de custos antigos. Não alteram o banco demonstrativo.
 
-Validação atual: **42 testes aprovados**, incluindo importação de compras, atualização/baixa/restauração de estoque e geração do documento OpenAPI.
+Validação atual: **49 testes aprovados**, incluindo importação de compras, atualização/baixa/restauração de estoque, geração do documento OpenAPI e exportação financeira.
+
+O relatório usa blocos com campos identificados em telas de até 760 px e tabelas na impressão A4. Textos longos quebram dentro das células em todas as larguras. Para repetir a verificação visual com a aplicação local iniciada, instale Playwright em uma pasta de trabalho ignorada pelo Git:
+
+```powershell
+npm install --prefix work/browser-check playwright
+$env:NODE_PATH = (Resolve-Path work/browser-check/node_modules).Path
+node work/browser-check/node_modules/playwright/cli.js install chromium
+node scripts/test-report-layout.cjs http://127.0.0.1:5080/api/v1/exports/report.html
+```
+
+O script consulta o relatório e testa 30 combinações de largura e conteúdo no Chromium com emulação móvel. As massas de teste são inseridas somente na página do navegador. Capturas e PDFs ficam em `work/report-layout/`. A verificação inclui textos longos, ausência de registros e retorno ao layout de tabela ao imprimir. A impressão no navegador nativo de um aparelho físico deve ser conferida no teste com usuários.
 
 ## Organização
 

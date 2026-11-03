@@ -79,8 +79,11 @@ window.ui = (() => {
         return `${get("year")}-${get("month")}-${get("day")}`;
     };
     const dateToInput = value => value ? `${value.slice(8, 10)}/${value.slice(5, 7)}/${value.slice(0, 4)}` : "";
+    const formatDateDigits = digits => [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)]
+        .filter(Boolean).join("/");
     const dateToApi = value => {
-        const match = /^([0-3]\d)\/([01]\d)\/(\d{4})$/.exec(String(value ?? "").trim());
+        const raw = String(value ?? "").trim();
+        const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(/^\d{8}$/.test(raw) ? formatDateDigits(raw) : raw);
         if (!match) throw new Error("Informe uma data válida no formato dia/mês/ano.");
         const [, day, month, year] = match;
         const parsed = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
@@ -214,6 +217,22 @@ window.ui = (() => {
     });
     document.addEventListener("input", event => {
         const input = event.target;
+        if (input instanceof HTMLInputElement && input.matches("[data-date-br]")) {
+            if (event.isComposing) return;
+            const digitsBeforeCaret = input.value.slice(0, input.selectionStart ?? input.value.length).replace(/\D/g, "").length;
+            const formatted = formatDateDigits(input.value.replace(/\D/g, ""));
+            if (formatted !== input.value) {
+                input.value = formatted;
+                let caret = 0;
+                let remaining = digitsBeforeCaret;
+                while (caret < formatted.length && remaining > 0) {
+                    if (formatted[caret++] !== "/") remaining--;
+                }
+                input.setSelectionRange(caret, caret);
+            }
+            input.setCustomValidity("");
+            return;
+        }
         if (!(input instanceof HTMLInputElement) || !input.classList.contains("decimal-input")) return;
         input.setCustomValidity(decimalDraft.test(input.value)
             ? ""
