@@ -198,12 +198,12 @@ public class ReportService(AppDbContext db)
         };
         var channels = dashboard.Channels.Count > 0
             ? string.Join("", dashboard.Channels.Select(channel => $"""
-                <tr><td>{E(channel.Name)}</td><td class="amount">{Money(channel.NetSalesCents)}</td><td class="amount">{Money(channel.EstimatedMarginCents)}</td><td>{channel.SalesWithCost} de {channel.SalesCount}</td></tr>
+                <tr><td data-label="Canal">{E(channel.Name)}</td><td data-label="Vendas líquidas" class="amount">{Money(channel.NetSalesCents)}</td><td data-label="Margem conhecida" class="amount">{Money(channel.EstimatedMarginCents)}</td><td data-label="Vendas com custo">{channel.SalesWithCost} de {channel.SalesCount}</td></tr>
                 """))
             : """<tr><td colspan="4" class="empty">Nenhuma venda por canal neste período.</td></tr>""";
         var movements = ledger.Count > 0
             ? string.Join("", ledger.Select(row => $"""
-                <tr><td>{Date(row.Date)}</td><td>{E(Kind(row.Kind))}{(row.IsReversal ? " · estorno" : "")}</td><td>{E(row.Description)}</td><td class="amount {(row.SignedCents < 0 ? "negative" : "positive")}">{Money(row.SignedCents)}</td></tr>
+                <tr><td data-label="Data">{Date(row.Date)}</td><td data-label="Tipo">{E(Kind(row.Kind))}{(row.IsReversal ? " · estorno" : "")}</td><td data-label="Descrição">{E(row.Description)}</td><td data-label="Valor" class="amount {(row.SignedCents < 0 ? "negative" : "positive")}">{Money(row.SignedCents)}</td></tr>
                 """))
             : """<tr><td colspan="4" class="empty">Nenhuma movimentação de caixa neste período.</td></tr>""";
         var note = dashboard.SalesWithCost < dashboard.SalesCount
@@ -224,12 +224,12 @@ public class ReportService(AppDbContext db)
                     body{margin:0;padding:32px 18px;background:linear-gradient(145deg,#fff5e2,#f8f2e8 52%,#fce9df)}
                     .toolbar{max-width:900px;margin:0 auto 16px;display:flex;justify-content:flex-end}
                     .toolbar button{border:0;border-radius:10px;padding:12px 18px;background:#b8323b;color:white;font:600 14px "Segoe UI",Arial,sans-serif;cursor:pointer;box-shadow:0 4px 12px #81232e33}
-                    .sheet{max-width:900px;margin:0 auto;padding:42px 48px;background:#fffefa;border:1px solid #efdfcf;border-radius:18px;box-shadow:0 18px 48px #68422817}
+                    .sheet{width:100%;max-width:900px;min-width:0;margin:0 auto;padding:42px 48px;background:#fffefa;border:1px solid #efdfcf;border-radius:18px;box-shadow:0 18px 48px #68422817;overflow-wrap:anywhere}
                     .masthead{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:24px;border-bottom:2px solid #f1dfca}
                     .brand{color:#81232e;font-size:13px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
                     h1{margin:8px 0 5px;color:#81232e;font-family:Georgia,serif;font-size:32px}
                     .business{margin:0;color:#745e53;font-size:15px;font-weight:650}
-                    .period{flex:0 0 auto;padding:11px 14px;border:1px solid #f0dfb9;border-radius:11px;background:#fff5da;color:#70552f;font-size:13px;line-height:1.55;text-align:right}
+                    .period{flex:0 0 auto;max-width:100%;padding:11px 14px;border:1px solid #f0dfb9;border-radius:11px;background:#fff5da;color:#70552f;font-size:13px;line-height:1.55;text-align:right}
                     .eyebrow{margin:28px 0 12px;color:#a52e38;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
                     .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
                     .metric{min-height:96px;padding:16px;border:1px solid #efdfcf;border-radius:12px;background:linear-gradient(145deg,#fffefa,#fff7e9)}
@@ -238,29 +238,37 @@ public class ReportService(AppDbContext db)
                     .metric strong{display:block;margin-top:12px;color:#51292a;font-size:19px;font-variant-numeric:tabular-nums}
                     .note{margin:12px 0 0;padding:10px 12px;border-left:3px solid #d29d32;background:#fff8e9;color:#725b43;font-size:12px}
                     h2{margin:26px 0 11px;color:#51292a;font-size:16px}
-                    table{width:100%;border-collapse:collapse;font-size:12px}
+                    table{width:100%;max-width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;font-size:12px}
+                    th,td{overflow-wrap:anywhere;white-space:normal}
+                    .movements-table col:nth-child(1){width:16%}.movements-table col:nth-child(2){width:19%}
+                    .movements-table col:nth-child(3){width:43%}.movements-table col:nth-child(4){width:22%}
                     th{padding:10px 11px;background:#81232e;color:white;font-size:11px;text-align:left}
                     th:first-child{border-radius:8px 0 0 0}
                     th:last-child{border-radius:0 8px 0 0}
                     td{padding:9px 11px;border-bottom:1px solid #f0e7dc;vertical-align:top}
                     tbody tr:nth-child(even){background:#fffaf2}
-                    .amount{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+                    .amount{text-align:right;font-variant-numeric:tabular-nums}
                     .positive{color:#4f704c;font-weight:650}
                     .negative{color:#a52e38;font-weight:650}
                     .empty{padding:18px;color:#806c61;text-align:center}
                     .foot{display:flex;justify-content:space-between;gap:18px;margin-top:28px;padding-top:14px;border-top:1px solid #efdfcf;color:#806c61;font-size:10px}
                     @page{size:A4;margin:13mm}
                     .masthead>div,.metric{min-width:0;overflow-wrap:anywhere}
-                    @media screen and (max-width:640px){
+                    @media screen and (max-width:760px){
                         body{padding:14px 8px}.sheet{padding:24px 14px}.masthead{flex-direction:column;gap:12px}
                         h1{font-size:27px}.period{text-align:left}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
                         .metric{padding:12px}.metric strong{font-size:16px}
-                        th,td{padding:8px 5px;font-size:11px}.foot{flex-wrap:wrap;gap:6px}
-                    }
-                    @media screen and (max-width:640px), print{
-                        table{table-layout:fixed;min-width:0}
-                        th,td,.amount{overflow-wrap:anywhere;white-space:normal}
-                        table:last-of-type th:nth-child(3){width:37%}
+                        .foot{flex-wrap:wrap;gap:6px}
+                        /* Stack each record on phones; keep the complete table for print. */
+                        table,tbody,tr,td{display:block;width:100%;min-width:0}
+                        colgroup{display:none}
+                        thead{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%)}
+                        tbody tr{margin-bottom:12px;border:1px solid #efdfcf;border-radius:10px;padding:6px 12px;background:#fffaf2}
+                        td{padding:9px 0;font-size:13px;text-align:left}
+                        td:last-child{border-bottom:0}
+                        td[data-label]::before{content:attr(data-label);display:block;margin-bottom:4px;color:#806c61;font-size:11px;font-weight:600}
+                        td.amount{text-align:left}
+                        td.empty{padding:16px 0;text-align:center}
                     }
                     @media print{
                         :root,body{background:#fff!important}
@@ -291,9 +299,9 @@ public class ReportService(AppDbContext db)
                     </div>
                     <p class="note">{{{E(note)}}} Custos diretos sem informação não são considerados zero.</p>
                     <h2>Vendas por canal</h2>
-                    <table><thead><tr><th>Canal</th><th class="amount">Vendas líquidas</th><th class="amount">Margem conhecida</th><th>Vendas com custo</th></tr></thead><tbody>{{{channels}}}</tbody></table>
+                    <table aria-label="Vendas por canal"><thead><tr><th scope="col">Canal</th><th scope="col" class="amount">Vendas líquidas</th><th scope="col" class="amount">Margem conhecida</th><th scope="col">Vendas com custo</th></tr></thead><tbody>{{{channels}}}</tbody></table>
                     <h2>Movimentações de caixa</h2>
-                    <table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th class="amount">Valor</th></tr></thead><tbody>{{{movements}}}</tbody></table>
+                    <table class="movements-table" aria-label="Movimentações de caixa"><colgroup><col><col><col><col></colgroup><thead><tr><th scope="col">Data</th><th scope="col">Tipo</th><th scope="col">Descrição</th><th scope="col" class="amount">Valor</th></tr></thead><tbody>{{{movements}}}</tbody></table>
                     <footer class="foot"><span>Gere Doce · Relatório gerado para uso interno.</span><span>{{{Date(DateOnly.FromDateTime(DateTime.Today))}}}</span></footer>
                 </main>
             </body>
