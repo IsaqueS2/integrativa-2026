@@ -5,6 +5,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Confeitaria.Web.Contracts;
 using Confeitaria.Web.Domain;
+using UglyToad.PdfPig.Core;
+using UglyToad.PdfPig.Fonts.Standard14Fonts;
+using UglyToad.PdfPig.Writer;
 
 namespace Confeitaria.Tests;
 
@@ -12,6 +15,32 @@ public sealed class PurchaseImportApiTests
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     { Converters = { new JsonStringEnumConverter() } };
+
+    [Fact]
+    public async Task Text_pdf_preview_preserves_item_lines_across_pages()
+    {
+        using var scenario = await Scenario.Create();
+        var pdf = new PdfDocumentBuilder();
+        var font = pdf.AddStandard14Font(Standard14Font.Courier);
+        var firstPage = pdf.AddPage(595, 842);
+        firstPage.AddText("Fornecedor teste", 14, new PdfPoint(40, 780), font);
+        firstPage.AddText("Farinha KG 2,000 20,00 40,00", 14, new PdfPoint(40, 730), font);
+        var secondPage = pdf.AddPage(595, 842);
+        secondPage.AddText("Acucar KG 1,000 10,00 10,00", 14, new PdfPoint(40, 780), font);
+        secondPage.AddText("VALOR TOTAL: 50,00", 14, new PdfPoint(40, 730), font);
+
+        using var response = await scenario.Client.PostAsync("/api/v1/purchase-imports/preview",
+            FileForm("nota.pdf", pdf.Build()));
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var preview = (await response.Content.ReadFromJsonAsync<PurchaseImportPreview>(Json))!;
+
+        Assert.Equal("PDF com texto", preview.Format);
+        Assert.Equal(5000, preview.TotalCents);
+        Assert.Collection(preview.Items,
+            item => { Assert.Equal("Farinha", item.Name); Assert.Equal(2, item.Quantity); Assert.Equal(4000, item.TotalCents); },
+            item => { Assert.Equal("Acucar", item.Name); Assert.Equal(1, item.Quantity); Assert.Equal(1000, item.TotalCents); });
+        Assert.Empty((await scenario.Get<PageResult<IngredientResponse>>("ingredients")).Items);
+    }
 
     [Fact]
     public async Task Nfe_preview_and_confirmation_create_expense_update_cost_and_add_stock_once()

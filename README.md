@@ -40,7 +40,7 @@ No terminal da raiz do repositório:
 dotnet restore
 dotnet tool restore
 dotnet build
-dotnet ef database update --project src/Confeitaria.Web
+dotnet ef database update --context AppDbContext --project src/Confeitaria.Web
 dotnet run --project src/Confeitaria.Web --launch-profile local -- --seed-demo
 ```
 
@@ -71,9 +71,12 @@ Para um front-end hospedado em outro domínio, adicione a origem exata em `Allow
 | Tela | Caminho |
 |---|---|
 | Painel financeiro | `/` |
+| Planos e seleção demonstrativa | `/Plans` |
 | Vendas, despesas, aportes e retiradas | `/Movements` |
 | Negócio, categorias, canais e taxas | `/Settings` |
 | Ingredientes, receitas e preços | `/Recipes` |
+
+A tela de planos apresenta Básico, Essencial e Pro, com comparação de recursos e seleção demonstrativa. Não ativa assinaturas, não processa pagamentos e não altera permissões ou dados do negócio. Os recursos apresentados incluem propostas para etapas futuras.
 
 Em desenvolvimento, o banco SQLite local fica em `src/Confeitaria.Web/confeitaria.db`. As migrações também são aplicadas no início da aplicação. Encerre com `Ctrl+C`.
 
