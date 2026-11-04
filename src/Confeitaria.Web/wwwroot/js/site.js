@@ -72,6 +72,22 @@ window.ui = (() => {
         });
         mobileBreakpoint.addEventListener("change", () => setMenuOpen(false));
     }
+    document.querySelectorAll(".nav-entry-toggle").forEach(toggle => {
+        const panel = document.getElementById(toggle.getAttribute("aria-controls"));
+        if (!panel) throw new Error(`Missing navigation options panel: ${toggle.getAttribute("aria-controls")}`);
+        toggle.addEventListener("click", () => {
+            const open = toggle.getAttribute("aria-expanded") !== "true";
+            document.querySelectorAll(".nav-entry-toggle").forEach(otherToggle => {
+                const otherPanel = document.getElementById(otherToggle.getAttribute("aria-controls"));
+                const otherOpen = otherToggle === toggle && open;
+                otherToggle.setAttribute("aria-expanded", String(otherOpen));
+                otherToggle.setAttribute("aria-label", `${otherOpen ? "Ocultar" : "Mostrar"} opções de ${otherToggle.closest(".nav-entry").querySelector(".nav-entry-heading a span").textContent}`);
+                otherPanel.classList.toggle("is-open", otherOpen);
+                otherPanel.setAttribute("aria-hidden", String(!otherOpen));
+                otherPanel.inert = !otherOpen;
+            });
+        });
+    });
     const moneyFormat = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
     const today = () => {
         const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());

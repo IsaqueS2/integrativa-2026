@@ -1,6 +1,6 @@
 # Confeitaria — protótipo de gestão financeira
 
-Avaliação Integrativa UNIPLAC. API em C# com ASP.NET Core, Entity Framework Core e SQLite, com quatro telas Razor simples. O front-end definitivo pode consumir a mesma API. O produto testa a hipótese de simplificar registros e consultas; as pesquisas não demonstram que todas as entrevistadas desconhecem o lucro.
+Avaliação Integrativa UNIPLAC. API em C# com ASP.NET Core, Entity Framework Core e SQLite, com telas Razor simples. O front-end definitivo pode consumir a mesma API. O produto testa a hipótese de simplificar registros e consultas; as pesquisas não demonstram que todas as entrevistadas desconhecem o lucro.
 
 ## Funcionalidades implementadas
 
@@ -71,12 +71,9 @@ Para um front-end hospedado em outro domínio, adicione a origem exata em `Allow
 | Tela | Caminho |
 |---|---|
 | Painel financeiro | `/` |
-| Planos e seleção demonstrativa | `/Plans` |
 | Vendas, despesas, aportes e retiradas | `/Movements` |
 | Negócio, categorias, canais e taxas | `/Settings` |
 | Ingredientes, receitas e preços | `/Recipes` |
-
-A tela de planos apresenta Básico, Essencial e Pro, com comparação de recursos e seleção demonstrativa. Não ativa assinaturas, não processa pagamentos e não altera permissões ou dados do negócio. Os recursos apresentados incluem propostas para etapas futuras.
 
 Em desenvolvimento, o banco SQLite local fica em `src/Confeitaria.Web/confeitaria.db`. As migrações também são aplicadas no início da aplicação. Encerre com `Ctrl+C`.
 

@@ -28,7 +28,14 @@
                 <label>Meio de pagamento<select name="paymentMethodId" data-catalog="paymentMethods"><option value="">Todos</option></select></label>
                 <label>Categoria<select name="categoryId" data-catalog="categories"><option value="">Todas</option></select></label>
             </div>
-            <div class="actions"><a class="button secondary" id="export-csv" href="#">Exportar movimentações CSV</a><a class="button secondary" id="export-summary" href="#">Exportar resumo CSV</a><a class="button secondary" id="export-pdf" href="#" target="_blank" rel="noopener">Relatório colorido · PDF</a></div>
+            <div class="dashboard-exports">
+                <p class="dashboard-exports-title">Exportar</p>
+                <div class="actions export-actions" role="group" aria-label="Exportar relatórios">
+                    <a class="button secondary" id="export-csv" href="#">Exportar movimentações CSV</a>
+                    <a class="button secondary" id="export-summary" href="#">Exportar resumo CSV</a>
+                    <a class="button secondary" id="export-pdf" href="#" target="_blank" rel="noopener">Relatório colorido · PDF</a>
+                </div>
+            </div>
         </details>
     </form>
 </section>

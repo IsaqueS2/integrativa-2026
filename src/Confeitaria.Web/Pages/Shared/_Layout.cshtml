@@ -37,20 +37,66 @@
         <span class="mobile-menu-label">Menu</span>
     </button>
     <nav id="primary-navigation" aria-label="Navegação principal">
-        <a href="/" data-nav-label="Painel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 10 8.5-7 8.5 7v10a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-7h6v7"/></svg><span>Painel</span></a>
-        <a href="/Plans" data-nav-label="Planos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4m8-4v4M4 11h16m-11 4 2 2 4-4"/></svg><span>Planos</span></a>
-        <a href="/Movements" data-nav-label="Lançamentos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h8l4 4V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path d="M14.5 3.5v5h5M8.5 13h7M8.5 17h7"/></svg><span>Lançamentos</span></a>
-        <a href="/Recipes" data-nav-label="Receitas e preços"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h16l-2 8H6l-2-8Z"/><path d="M6 13c0-2 1.5-3.5 3.5-3.5.5-2.2 2.2-3.5 4-3.5 2.2 0 4 1.7 4 4 1.6.1 2.5 1.2 2.5 3H6Z"/><path d="M10 17v1m4-1v1"/></svg><span>Receitas e preços</span></a>
-        <a href="/Settings" data-nav-label="Configurações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1 1.1.9-1.6 2.8-1.4-.5a7.7 7.7 0 0 1-1.5.9l-.2 1.5h-3.3l-.2-1.5a7.7 7.7 0 0 1-1.5-.9l-1.4.5-1.6-2.8 1.1-.9a7 7 0 0 1 0-1.8l-1.1-.9 1.6-2.8 1.4.5a7.7 7.7 0 0 1 1.5-.9l.2-1.5h3.3l.2 1.5a7.7 7.7 0 0 1 1.5.9l1.4-.5 1.6 2.8-1.1.9a7 7 0 0 1-.1 1.8Z"/></svg><span>Configurações</span></a>
-        @if (IsSectionDefined("PageOptions"))
-        {
-            <details class="nav-options">
-                <summary>Opções da tela</summary>
-                <div class="nav-options-links">
-                    @await RenderSectionAsync("PageOptions")
+        <div class="nav-entry @(ViewData["Title"]?.ToString() == "Painel" ? "nav-entry-current" : "")">
+            <div class="nav-entry-heading">
+                <a href="/" data-nav-label="Painel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 10 8.5-7 8.5 7v10a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-7h6v7"/></svg><span>Painel</span></a>
+                @if (ViewData["Title"]?.ToString() == "Painel" && IsSectionDefined("PageOptions"))
+                {
+                    <button class="secondary nav-entry-toggle" type="button" aria-expanded="false" aria-controls="nav-options-dashboard" aria-label="Mostrar opções do Painel"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 6 5 5 5-5" /></svg></button>
+                }
+            </div>
+            @if (ViewData["Title"]?.ToString() == "Painel" && IsSectionDefined("PageOptions"))
+            {
+                <div class="nav-entry-panel" id="nav-options-dashboard" aria-hidden="true" inert>
+                    <div class="nav-entry-options" aria-label="Opções do painel">@await RenderSectionAsync("PageOptions")</div>
                 </div>
-            </details>
-        }
+            }
+        </div>
+        <div class="nav-entry @(ViewData["Title"]?.ToString() == "Lançamentos" ? "nav-entry-current" : "")">
+            <div class="nav-entry-heading">
+                <a href="/Movements" data-nav-label="Lançamentos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h8l4 4V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path d="M14.5 3.5v5h5M8.5 13h7M8.5 17h7"/></svg><span>Lançamentos</span></a>
+                @if (ViewData["Title"]?.ToString() == "Lançamentos" && IsSectionDefined("PageOptions"))
+                {
+                    <button class="secondary nav-entry-toggle" type="button" aria-expanded="false" aria-controls="nav-options-movements" aria-label="Mostrar opções de Lançamentos"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 6 5 5 5-5" /></svg></button>
+                }
+            </div>
+            @if (ViewData["Title"]?.ToString() == "Lançamentos" && IsSectionDefined("PageOptions"))
+            {
+                <div class="nav-entry-panel" id="nav-options-movements" aria-hidden="true" inert>
+                    <div class="nav-entry-options" aria-label="Opções de lançamentos">@await RenderSectionAsync("PageOptions")</div>
+                </div>
+            }
+        </div>
+        <div class="nav-entry @(ViewData["Title"]?.ToString() == "Receitas e preços" ? "nav-entry-current" : "")">
+            <div class="nav-entry-heading">
+                <a href="/Recipes" data-nav-label="Receitas e preços"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h16l-2 8H6l-2-8Z"/><path d="M6 13c0-2 1.5-3.5 3.5-3.5.5-2.2 2.2-3.5 4-3.5 2.2 0 4 1.7 4 4 1.6.1 2.5 1.2 2.5 3H6Z"/><path d="M10 17v1m4-1v1"/></svg><span>Receitas e preços</span></a>
+                @if (ViewData["Title"]?.ToString() == "Receitas e preços" && IsSectionDefined("PageOptions"))
+                {
+                    <button class="secondary nav-entry-toggle" type="button" aria-expanded="false" aria-controls="nav-options-recipes" aria-label="Mostrar opções de Receitas e preços"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 6 5 5 5-5" /></svg></button>
+                }
+            </div>
+            @if (ViewData["Title"]?.ToString() == "Receitas e preços" && IsSectionDefined("PageOptions"))
+            {
+                <div class="nav-entry-panel" id="nav-options-recipes" aria-hidden="true" inert>
+                    <div class="nav-entry-options" aria-label="Opções de receitas e preços">@await RenderSectionAsync("PageOptions")</div>
+                </div>
+            }
+        </div>
+        <div class="nav-entry @(ViewData["Title"]?.ToString() == "Configurações" ? "nav-entry-current" : "")">
+            <div class="nav-entry-heading">
+                <a href="/Settings" data-nav-label="Configurações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1 1.1.9-1.6 2.8-1.4-.5a7.7 7.7 0 0 1-1.5.9l-.2 1.5h-3.3l-.2-1.5a7.7 7.7 0 0 1-1.5-.9l-1.4.5-1.6-2.8 1.1-.9a7 7 0 0 1 0-1.8l-1.1-.9 1.6-2.8 1.4.5a7.7 7.7 0 0 1 1.5-.9l.2-1.5h3.3l.2 1.5a7.7 7.7 0 0 1 1.5.9l1.4-.5 1.6 2.8-1.1.9a7 7 0 0 1-.1 1.8Z"/></svg><span>Configurações</span></a>
+                @if (ViewData["Title"]?.ToString() == "Configurações" && IsSectionDefined("PageOptions"))
+                {
+                    <button class="secondary nav-entry-toggle" type="button" aria-expanded="false" aria-controls="nav-options-settings" aria-label="Mostrar opções de Configurações"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 6 5 5 5-5" /></svg></button>
+                }
+            </div>
+            @if (ViewData["Title"]?.ToString() == "Configurações" && IsSectionDefined("PageOptions"))
+            {
+                <div class="nav-entry-panel" id="nav-options-settings" aria-hidden="true" inert>
+                    <div class="nav-entry-options" aria-label="Opções de configurações">@await RenderSectionAsync("PageOptions")</div>
+                </div>
+            }
+        </div>
     </nav>
 </header>
 <main id="conteudo" aria-busy="true">
