@@ -3135,14 +3135,140 @@ html.dashboard-previous .dashboard-heading {
 
 .dashboard-filters {
     margin-block: 0 20px;
+    padding: 20px 22px 16px;
+    border: 1px solid #e7d9ca;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 253, 250, 0.96), rgba(247, 239, 232, 0.96));
+    box-shadow: 0 6px 16px rgb(90 60 43 / 4%);
+}
+
+.dashboard-filters form {
+    display: grid;
+    gap: 18px;
 }
 
 .dashboard-filters h2 {
+    margin: 0 0 18px;
+    color: #5a2f2d;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+}
+
+.dashboard-filters label {
+    gap: 8px;
+    color: #5f4a42;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dashboard-filters input,
+.dashboard-filters select {
+    min-height: 46px;
+    border-color: #d8c5b2;
+    border-radius: 10px;
+    background: #fffdfb;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 60%);
+    color: #3a2d29;
+}
+
+.dashboard-filters input:hover,
+.dashboard-filters select:hover {
+    border-color: #c5a38d;
+}
+
+.dashboard-filters .actions {
+    justify-content: flex-end;
     margin-top: 0;
+}
+
+.dashboard-filters .actions > button,
+.dashboard-filters .actions > .button {
+    min-height: 46px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.dashboard-filters .actions > button:not(.secondary):not(.danger),
+.dashboard-filters .actions > .button:not(.secondary):not(.danger) {
+    border-color: #a64047;
+    background: linear-gradient(180deg, #c85056, #a13d43);
+    box-shadow: 0 4px 10px rgb(138 60 62 / 12%);
+}
+
+.dashboard-filters .actions > button:not(.secondary):not(.danger):hover,
+.dashboard-filters .actions > .button:not(.secondary):not(.danger):hover {
+    border-color: #8f3138;
+    background: linear-gradient(180deg, #b74a4c, #8f2e35);
+}
+
+.dashboard-filters .actions > button.secondary,
+.dashboard-filters .actions > .button.secondary {
+    border-color: #d9c7b4;
+    background: #efe4d9;
+    color: #6a4d3f;
+}
+
+.dashboard-filters .actions > button.secondary:hover,
+.dashboard-filters .actions > .button.secondary:hover {
+    border-color: #caa98e;
+    background: #ead8c8;
+    color: #4f3633;
 }
 
 .dashboard-filters .dashboard-basic-filters {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.advanced-filters {
+    margin-top: 6px;
+    border: 1px solid #e8dbc8;
+    border-radius: 14px;
+    background: rgba(255, 251, 247, 0.7);
+}
+
+.advanced-filters > summary {
+    padding: 12px 18px;
+    color: #533d37;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.advanced-filters > .grid,
+.advanced-filters > .actions {
+    margin-inline: 18px;
+}
+
+.advanced-filters > .grid {
+    margin-top: 12px;
+    margin-bottom: 0;
+}
+
+.advanced-filters > .actions {
+    justify-content: flex-start;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.advanced-filters > .actions > .button,
+.advanced-filters > .actions > a.button {
+    min-height: 42px;
+    border-color: #d9c4ae;
+    border-radius: 9px;
+    background: #efe2d4;
+    color: #4d3a35;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 60%);
+}
+
+.advanced-filters > .actions > .button:hover,
+.advanced-filters > .actions > a.button:hover {
+    border-color: #c9a98d;
+    background: #e8d5c1;
+    color: #3e2d2b;
 }
 
 #dashboard-alerts[hidden] {
