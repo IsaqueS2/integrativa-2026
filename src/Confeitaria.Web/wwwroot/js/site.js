@@ -18,6 +18,7 @@ window.ui = (() => {
     const finishInitialLoad = () => {
         if (loaderFinished) return;
         loaderFinished = true;
+        revealHashTarget();
         clearTimeout(loaderHideTimer);
         const remaining = Math.max(0, 550 - (performance.now() - loaderStartedAt));
         loaderHideTimer = setTimeout(hidePageLoader, remaining);
@@ -261,19 +262,67 @@ window.ui = (() => {
         if (event.target instanceof HTMLFormElement)
             event.target.querySelectorAll(".touched").forEach(input => input.classList.remove("touched"));
     });
+    function syncSectionControls(target) {
+        document.querySelectorAll("[data-expand-target]").forEach(link => {
+            if (link.dataset.expandTarget !== target.id) return;
+            link.setAttribute("aria-controls", target.id);
+            link.setAttribute("aria-expanded", String(target.open));
+            link.classList.toggle("is-active", target.open);
+        });
+    }
+    document.querySelectorAll("details.page-option").forEach(target => {
+        syncSectionControls(target);
+        target.addEventListener("toggle", () => syncSectionControls(target));
+    });
+    function scrollToSection(target) {
+        requestAnimationFrame(() => {
+            const heading = target.querySelector("summary, h2") || target;
+            const focusTarget = getComputedStyle(heading).display === "none" ? target : heading;
+            if (!focusTarget.hasAttribute("tabindex")) focusTarget.setAttribute("tabindex", "-1");
+            focusTarget.focus({ preventScroll: true });
+            target.scrollIntoView({ block: "start" });
+        });
+    }
+    function revealHashTarget() {
+        let id;
+        try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
+        const target = document.getElementById(id);
+        if (!target) return;
+        for (let parent = target; parent; parent = parent.parentElement) {
+            if (parent instanceof HTMLDetailsElement) {
+                parent.open = true;
+                syncSectionControls(parent);
+            }
+        }
+        scrollToSection(target);
+    }
+    window.addEventListener("hashchange", revealHashTarget);
+    document.addEventListener("click", event => {
+        const link = event.target.closest("a[href]");
+        if (!link || link.target === "_blank" || link.hasAttribute("data-expand-target") || event.defaultPrevented ||
+            event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        const destination = new URL(link.href, location.href);
+        if (destination.origin !== location.origin || destination.pathname !== location.pathname ||
+            destination.search !== location.search || !destination.hash) return;
+        let target;
+        try { target = document.getElementById(decodeURIComponent(destination.hash.slice(1))); } catch { return; }
+        if (!target?.closest("details.page-option")) return;
+        event.preventDefault();
+        history.pushState(null, "", destination.hash);
+        revealHashTarget();
+    });
     document.addEventListener("click", event => {
         const link = event.target.closest("a[data-expand-target]");
-        if (!link) return;
+        if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
         const target = document.getElementById(link.dataset.expandTarget);
         if (!(target instanceof HTMLDetailsElement)) return;
         event.preventDefault();
-        target.open = true;
-        history.replaceState(null, "", link.getAttribute("href"));
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        target.open = !target.open;
+        syncSectionControls(target);
+        history.replaceState(null, "", target.open ? link.getAttribute("href") : location.pathname + location.search);
+        if (target.open) scrollToSection(target);
     });
-    const targetFromHash = document.getElementById(decodeURIComponent(location.hash.slice(1)));
-    if (targetFromHash instanceof HTMLDetailsElement && targetFromHash.classList.contains("page-option"))
-        targetFromHash.open = true;
+    revealHashTarget();
     function bindAction(id, handler) {
         document.getElementById(id).addEventListener("click", async event => {
             const button = event.target.closest("button[data-action]");

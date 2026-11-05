@@ -2,8 +2,6 @@
 (async () => {
     const { api, money, escape, rows, date, notify } = ui;
     const form = document.getElementById("dashboard-filter");
-    const filterOption = document.getElementById("dashboard-filters-option");
-    const noticeOption = document.getElementById("dashboard-notices-option");
     const versionToggle = document.getElementById("dashboard-version-toggle");
     const dashboardVersionKey = "gere-doce.dashboard-version";
     const readPreviousVersion = () => {
@@ -15,10 +13,8 @@
         versionToggle.setAttribute("aria-pressed", String(previous));
         versionToggle.textContent = previous ? "Voltar ao painel atualizado" : "Usar painel anterior";
         versionToggle.title = previous
-            ? "Ativa o painel com atalhos, alertas e filtros visíveis."
-            : "Mostra o painel com filtros e avisos recolhidos.";
-        filterOption.open = !previous;
-        noticeOption.open = !previous;
+            ? "Ativa o painel com atalhos e comparações."
+            : "Mostra a apresentação anterior do painel.";
         try { localStorage.setItem(dashboardVersionKey, previous ? "previous" : "updated"); }
         catch { /* The toggle still works for this page when browser storage is unavailable. */ }
     };
@@ -59,10 +55,8 @@
             ...warnings.map(warning => `<li class="notice-warning">${escape(warning)}</li>`),
             costAction
         ].filter(Boolean).join("");
-        const hasNotices = warnings.length > 0 || Boolean(costAction);
-        noticeOption.hidden = !hasNotices;
-        const noticeMenuLink = document.querySelector('[data-expand-target="dashboard-notices-option"]');
-        if (noticeMenuLink) noticeMenuLink.hidden = !hasNotices;
+        if (!warnings.length && !costAction)
+            document.getElementById("dashboard-notices").innerHTML = '<li class="empty-state">Nenhum ponto de atenção no período selecionado.</li>';
         const channels = summary.channels || [];
         rows("channel-totals", channels.map(channel => `<tr><td>${escape(channel.name)}</td><td class="money">${money(channel.netSalesCents)}</td><td class="money">${money(channel.estimatedMarginCents)}</td><td>${channel.salesWithCost}/${channel.salesCount} vendas</td></tr>`).join(""), 4, "Nenhum canal teve vendas no período selecionado.");
     }

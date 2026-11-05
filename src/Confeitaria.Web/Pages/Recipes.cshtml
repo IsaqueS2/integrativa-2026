@@ -7,39 +7,6 @@
         <p>Monte a ficha técnica, conheça o custo por unidade e simule um preço para valorizar seu trabalho.</p>
     </div>
 </div>
-<details id="purchase-import-option" class="page-option">
-    <summary>Importar uma nota de compra</summary>
-    <section class="recipe-section purchase-import-section">
-        <h2>Importar compra de insumos</h2>
-        <p class="hint">Anexe o XML da NF-e, um PDF ou uma foto. A leitura é feita localmente; confira e ajuste os campos antes de gravar a despesa e atualizar o estoque.</p>
-        <form id="purchase-import-form">
-            <label>Documento da compra<input type="file" name="file" accept=".xml,.pdf,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp" required /></label>
-            <div class="actions"><button type="submit">Ler documento</button></div>
-        </form>
-        <section id="purchase-import-review" class="purchase-import-review" hidden>
-            <h3>Revise os dados extraídos</h3>
-            <p id="purchase-import-notice" class="hint" role="status"></p>
-            <div class="grid">
-                <label>Fornecedor<input id="purchase-supplier" maxlength="120" required /></label>
-                <label>Número da nota<input id="purchase-invoice-number" maxlength="40" /></label>
-                <label>Data da compra<input id="purchase-date" type="date" required /></label>
-                <label>Total da nota<input id="purchase-total" type="text" inputmode="decimal" class="decimal-input" required /></label>
-            </div>
-            <h4>Itens e valores</h4>
-            <div class="table-wrap">
-                <table class="recipe-mobile-table">
-                    <thead><tr><th>Insumo/produto</th><th>Quantidade</th><th>Unidade</th><th class="money">Valor do item</th><th>Ingrediente no sistema</th><th>Ações</th></tr></thead>
-                    <tbody id="purchase-import-rows"></tbody>
-                </table>
-            </div>
-            <div class="actions">
-                <button type="button" class="secondary" id="purchase-add-line">Adicionar item</button>
-                <button type="button" id="purchase-confirm">Confirmar importação</button>
-                <button type="button" class="secondary" id="purchase-cancel">Cancelar</button>
-            </div>
-        </section>
-    </section>
-</details>
 <div id="recipe-workflow" class="recipe-workflow" data-step="1">
     <ol class="recipe-workflow-steps" aria-label="Etapas para criar uma receita">
         <li data-step-indicator="1" aria-current="step"><span>1</span><span>Ingredientes</span></li>
@@ -107,6 +74,39 @@
     </div><p class="hint">Margem sobre o preço de venda é diferente de markup sobre o custo. Informe apenas taxas e impostos aplicáveis ao seu negócio.</p><div class="actions"><button type="submit">Calcular preço sugerido</button><button type="button" class="secondary" data-previous-recipe-step="3">Voltar ao custo</button></div></form><output id="price-output" class="spaced" aria-live="polite"></output>
 </section>
 </div>
+<details id="purchase-import-option" class="page-option">
+    <summary>Importar uma nota de compra</summary>
+    <section class="recipe-section purchase-import-section">
+        <h2>Importar compra de insumos</h2>
+        <p class="hint">Anexe o XML da NF-e, um PDF ou uma foto. A leitura é feita localmente; confira e ajuste os campos antes de gravar a despesa e atualizar o estoque.</p>
+        <form id="purchase-import-form">
+            <label>Documento da compra<input type="file" name="file" accept=".xml,.pdf,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp" required /></label>
+            <div class="actions"><button type="submit">Ler documento</button></div>
+        </form>
+        <section id="purchase-import-review" class="purchase-import-review" hidden>
+            <h3>Revise os dados extraídos</h3>
+            <p id="purchase-import-notice" class="hint" role="status"></p>
+            <div class="grid">
+                <label>Fornecedor<input id="purchase-supplier" maxlength="120" required /></label>
+                <label>Número da nota<input id="purchase-invoice-number" maxlength="40" /></label>
+                <label>Data da compra<input id="purchase-date" type="date" required /></label>
+                <label>Total da nota<input id="purchase-total" type="text" inputmode="decimal" class="decimal-input" required /></label>
+            </div>
+            <h4>Itens e valores</h4>
+            <div class="table-wrap">
+                <table class="recipe-mobile-table">
+                    <thead><tr><th>Insumo/produto</th><th>Quantidade</th><th>Unidade</th><th class="money">Valor do item</th><th>Ingrediente no sistema</th><th>Ações</th></tr></thead>
+                    <tbody id="purchase-import-rows"></tbody>
+                </table>
+            </div>
+            <div class="actions">
+                <button type="button" class="secondary" id="purchase-add-line">Adicionar item</button>
+                <button type="button" id="purchase-confirm">Confirmar importação</button>
+                <button type="button" class="secondary" id="purchase-cancel">Cancelar</button>
+            </div>
+        </section>
+    </section>
+</details>
 <details id="saved-recipes-option" class="page-option"><summary>Receitas salvas</summary><section id="saved-recipes" class="recipe-section saved-recipes"><h2>Suas receitas</h2><div class="table-wrap"><table class="recipe-mobile-table"><thead><tr><th>Receita</th><th>Rendimento</th><th>Ações</th></tr></thead><tbody id="recipe-rows"></tbody></table></div><p id="recipe-list-info" class="hint"></p></section></details>
 @section Scripts { <script src="~/js/recipes.js" asp-append-version="true"></script> }
 @section PageOptions {
